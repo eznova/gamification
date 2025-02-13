@@ -68,7 +68,7 @@ export function loadSayThanxContent(userId, backendUrl) {
 
                             const detailsDiv = document.createElement('div');
                             detailsDiv.classList.add('user-card-text-secondary');
-                            detailsDiv.textContent = `${user.title} | ${user.role_name} | ${user.department_name}`;
+                            detailsDiv.textContent = `${user.job_title} | ${user.job_role} | ${user.department_name}`;
 
                             // Добавляем две строки (имя и должность, роль, департамент) в колонку
                             col2.appendChild(nameDiv);

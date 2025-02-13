@@ -5,36 +5,6 @@ from psycopg2.extras import RealDictCursor
 
 # Эндпоинт для получения ncoins и рейтинга пользователя по user_id
 def get_user_details(user_id):
-    """
-    Get user details like ncoins, npoints, and others
-    ---
-    parameters:
-      - name: user_id
-        in: path
-        type: integer
-        required: true
-        description: ID of the user
-    responses:
-      200:
-        description: A user's details (ncoins, npoints, etc.)
-        schema:
-          id: UserDetails
-          properties:
-            user_id:
-              type: integer
-              description: The user's ID
-            ncoins:
-              type: integer
-              description: The user's ncoins
-            npoints:
-              type: integer
-              description: The user's npoints
-            interests:
-              type: string
-              description: The user's interests
-      404:
-        description: No details found for this user
-    """
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -118,60 +88,6 @@ def get_user_team_members(user_id):
         return jsonify({"error": str(e)}), 500
 
 def get_user_personal(user_id):
-    """
-    Get personal details of a user
-    ---
-    parameters:
-      - name: user_id
-        in: path
-        type: integer
-        required: true
-        description: ID of the user
-    responses:
-      200:
-        description: A user's personal details
-        schema:
-          id: UserPersonal
-          properties:
-            id:
-              type: integer
-              description: The user's ID
-            tg_id:
-              type: integer
-              description: The user's Telegram ID
-            login:
-              type: string
-              description: The user's login
-            jira_login:
-              type: string
-              description: The user's Jira login
-            name:
-              type: string
-              description: The user's first name
-            patronymic:
-              type: string
-              description: The user's patronymic
-            surname:
-              type: string
-              description: The user's surname
-            birthdate:
-              type: string
-              description: The user's birthdate
-            tg_nickname:
-              type: string
-              description: The user's Telegram nickname
-            phone:
-              type: string
-              description: The user's phone number
-            department_id:
-              type: integer
-              description: The user's department ID
-            grade_id:
-              type: integer
-              description: The user's grade ID
-      404:
-        description: User not found
-    """
     try:
         conn = get_db_connection()
         cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -197,43 +113,6 @@ def get_user_personal(user_id):
 
 
 def get_user_job_titles_and_departments(user_id):
-    """
-    Get job titles and departments for a user
-    ---
-    parameters:
-      - name: user_id
-        in: path
-        type: integer
-        required: true
-        description: ID of the user
-    responses:
-      200:
-        description: A list of job titles and departments
-        schema:
-          id: JobInfo
-          properties:
-            user_id:
-              type: integer
-              description: The user's ID
-            job_titles:
-              type: array
-              items:
-                properties:
-                  title:
-                    type: string
-                    description: The job title
-                  department:
-                    type: string
-                    description: The department name
-                  role:
-                    type: string
-                    description: The role name
-                  projects:
-                    type: string
-                    description: The user's projects
-      404:
-        description: No job titles or departments found
-    """
     try:
         conn = get_db_connection()
         cursor = conn.cursor(cursor_factory=RealDictCursor)
@@ -241,9 +120,8 @@ def get_user_job_titles_and_departments(user_id):
         query = """
         SELECT ujt.job_title, d.department_name, ujt.job_role, ujt.projects
         FROM user_job_titles ujt
-        JOIN user_teams ut ON ujt.user_id = ut.user_id
-        JOIN teams t ON ut.team_id = t.id
-        JOIN departments d ON t.department_id = d.id
+        JOIN users u ON u.id = ujt.user_id 
+        JOIN departments d ON u.department_id = d.id
         JOIN user_roles ur ON ujt.user_id = ur.user_id
         WHERE ujt.user_id = %s;
         """
