@@ -1,0 +1,6 @@
+*/__pychache__
+backend/app/__pycache__/
+backend/venv/
+backend/app/config.py
+backend/app/__pycache__
+./backend/app/config.py
