@@ -1,0 +1,17 @@
+# Конфигурация подключения к базе данных
+DB_CONFIG = {
+    "dbname": "gami_db",
+    "user": "postgres",
+    "password": "postgres",
+    "host": "127.0.0.1",
+    "port": 5437,
+}
+
+SYSTEM_COMPANY_ID = {
+    'company_id':'NIIAS', 
+    'company_name':'СПбФ АО НИИАС'
+}
+
+DEFAULT_USER_ROLE_ID = 1
+DEFAULT_TEAM_ID = 1
+DEFAULT_THX_COUNT = 3
