@@ -16,6 +16,43 @@ export function loadSayThanxContent(userId, backendUrl) {
         })
         .then(template => {
             content.innerHTML = template;
+            const searchContainer = document.createElement('div');
+            searchContainer.classList.add('row');
+            // Добавляем поле для поиска
+            const searchInputDiv = document.createElement('div');
+            searchInputDiv.classList.add('col-6');
+            const searchInput = document.createElement('input');
+            searchInput.type = 'text';
+            searchInput.id = 'user-search';
+            searchInput.classList.add('form-control');
+            searchInput.placeholder = 'Поиск коллег';
+            searchInput.style.marginBottom = '10px';
+            searchInputDiv.appendChild(searchInput);
+            searchContainer.appendChild(searchInputDiv);
+
+            const thanxLeftDiv = document.createElement('div');
+            thanxLeftDiv.classList.add('col-6');
+            const thanxLeft = document.createElement('input');
+            thanxLeft.type = 'text';
+            thanxLeft.readOnly = true;
+            thanxLeft.disabled = true;
+            thanxLeft.classList.add('form-control', 'user-card-text');
+            thanxLeft.style.outline = 'none';
+            fetch(`${backendUrl}/thx/get/${currentUserId}`)
+                .then(res => res.json())
+                .then(data => {
+                    console.log(data);
+                    thanxLeft.placeholder = `Осталось спасибо: ${data.thx_count} / ${data.max_thx}`;
+                    thanxLeftDiv.appendChild(thanxLeft);
+                })
+            searchContainer.appendChild(thanxLeftDiv);
+            content.appendChild(searchContainer);
+
+            const searchHr = document.createElement('hr');
+            searchHr.style.marginTop = '1em';
+            searchHr.style.marginBottom = '1em';
+            content.appendChild(searchHr);
+
 
             const sayThanxForm = document.getElementById('say-thanx-content');
             
@@ -23,6 +60,9 @@ export function loadSayThanxContent(userId, backendUrl) {
             sayThanxForm.style.display = 'grid';
             sayThanxForm.style.gridTemplateColumns = 'repeat(2, 1fr)'; // 2 колонки
             sayThanxForm.style.gridGap = '20px'; // Отступы между элементами
+
+
+
 
             return Promise.all([ 
                 fetch(`${backendUrl}/users/get/all`).then(res => res.json())
@@ -117,6 +157,22 @@ export function loadSayThanxContent(userId, backendUrl) {
                         }
                     });
 
+                    // Фильтрация пользователей при вводе текста
+                    searchInput.addEventListener('input', () => {
+                        const searchValue = searchInput.value.toLowerCase();
+                        const userDivs = sayThanxForm.querySelectorAll('.user-row'); // Получаем список всех пользователей
+
+                        userDivs.forEach(userDiv => {
+                            const name = userDiv.querySelector('.user-card-text').textContent.toLowerCase();
+                            const details = userDiv.querySelector('.user-card-text-secondary').textContent.toLowerCase();
+                            if (name.includes(searchValue) || details.includes(searchValue)) {
+                                userDiv.style.display = 'flex';
+                            } else {
+                                userDiv.style.display = 'none';
+                            }
+                        });
+                    });
+                    
                     content.appendChild(sayThanxForm);
                 });
         });
