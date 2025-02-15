@@ -7,6 +7,7 @@ from config import DEFAULT_THX_COUNT
 def add_thx():
     try:
         data = request.get_json()
+        print(data)
         reciever_id = data.get('receiver_id')
         sender_id = data.get('sender_id')
         created_at = datetime.now()
@@ -37,8 +38,12 @@ def add_thx():
         # update thanks count for sender user and get updated thanks count back
         cursor.execute("UPDATE user_details SET thanks_count = thanks_count - 1 WHERE user_id = %s", (sender_id,))
         cursor.execute("SELECT thanks_count FROM user_details WHERE user_id = %s", (sender_id,))
+        # add ncoins and npoints to reciever
+        # get thanks weight from achievements table
+        cursor.execute("SELECT achievement_weight FROM achievements WHERE id = 1")
+        thx_weight = cursor.fetchone()[0]
+        cursor.execute("UPDATE user_details SET ncoins = ncoins + %s, npoints = npoints + %s WHERE user_id = %s returning ncoins, npoints", (thx_weight, thx_weight, reciever_id))
         sender_thx_count = cursor.fetchone()[0]
-       
         cursor.close()
 
         conn.commit()
