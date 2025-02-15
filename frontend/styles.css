@@ -279,6 +279,12 @@ input::placeholder {
     /* width: auto; */
     text-align: left;
     margin-bottom: 0.5em;
+    cursor: pointer;
+}
+
+.group-title:hover {
+    background-color: #5367DF;
+    transition: filter 0.3s ease;
 }
 
 /* Контейнер для группы ачивок */

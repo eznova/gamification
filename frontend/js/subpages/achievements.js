@@ -561,6 +561,9 @@ export async function loadAchievementsContent(userId, backendUrl) {
             firstGroupTitleDiv.classList.add('row');
             const groupTitle = document.createElement('div');
             groupTitle.classList.add('group-title');
+            // groupTitle.addEventListener('mouseover', () => {
+            //     groupButton.style.cursor = 'pointer';
+            // })
             if (groupId === '1') {
                 groupTitle.classList.add('col-md-7');
 
@@ -581,7 +584,6 @@ export async function loadAchievementsContent(userId, backendUrl) {
                 groupTitle.textContent = group.groupName;
                 firstGroupTitleDiv.appendChild(groupTitle);
             }
-
             groupTitle.addEventListener('click', () => {
                 // Очищаем контейнер достижений
                 achievmentsContainer.innerHTML = '';
