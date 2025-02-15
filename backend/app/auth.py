@@ -130,7 +130,7 @@ def register():
     required_fields = [
         'code', 'surname', 'name', 'patronymic', 'birthdate', 'hobbies',
         'jobTitle', 'role', 'department', 'projects', 'telegram', 'phone',
-        'jiraLogin', 'password', 'confirmPassword'
+        'jiraLogin', 'password', 'confirmPassword', 'onboarding_date'
     ]
 
     # Проверка наличия всех обязательных полей
@@ -155,6 +155,7 @@ def register():
         "jobTitle": data["jobTitle"],
         "jobRole": data["role"],
         "department": data["department"],
+        "onboarding_date": data["onboarding_date"],
         "projects": data["projects"],
         "telegram": data["telegram"],
         "phone": data["phone"],
@@ -206,6 +207,7 @@ def register_user(data):
     user_job_info = {
         "job_title": data["jobTitle"],
         "role": data["jobRole"],
+        "onboarding_date": datetime.strptime(data["onboarding_date"], "%d.%m.%Y").date(),
         "projects": data["projects"]
     }
 
@@ -287,11 +289,11 @@ def register_user(data):
     
     # SQL-запрос для вставки данных в user_job_titles
     insert_job_title_query = """
-    INSERT INTO user_job_titles (user_id, job_title, job_role, projects)
-    VALUES (%s, %s, %s, %s);
+    INSERT INTO user_job_titles (user_id, job_title, job_role, projects, onboarding_date)
+    VALUES (%s, %s, %s, %s, %s);
     """
     # Выполняем вставку роли пользователя
-    cursor.execute(insert_job_title_query, (user_id, user_job_info["job_title"], user_job_info["role"], user_job_info["projects"]))
+    cursor.execute(insert_job_title_query, (user_id, user_job_info["job_title"], user_job_info["role"], user_job_info["projects"], user_job_info["onboarding_date"]))
     # print("job_title", user_job_info["job_title"])
     # return code_result
 

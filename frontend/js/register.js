@@ -240,8 +240,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const jobStartField = document.createElement('input');
     jobStartField.classList.add('form-control', 'mb-3');
     jobStartField.setAttribute('type', 'date');
-    jobStartField.setAttribute('name', 'jobStartDate');
-    jobStartField.setAttribute('id', 'jobStartDate');
+    jobStartField.setAttribute('name', 'onboarding_date');
+    jobStartField.setAttribute('id', 'onboarding_date');
     jobStartField.setAttribute('placeholder', 'введите день начала работы');
 
     // Ограничиваем выбор дат (пользователь не может выбрать будущее)
@@ -249,7 +249,7 @@ document.addEventListener('DOMContentLoaded', function () {
     jobStartField.setAttribute('max', jobToday);
 
     const jobStartLabel = document.createElement('label');
-    jobStartLabel.setAttribute('for', 'jobStartDate');
+    jobStartLabel.setAttribute('for', 'onboarding_date');
 
     const jobFirstLine = document.createElement('span');
     jobFirstLine.textContent = 'День начала работы*';
