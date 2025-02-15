@@ -86,18 +86,17 @@ def get_top10_users():
         SELECT 
             u.id, 
             name, 
-            surname, 
+            surname,
             job_role,
             department_name,
             job_title,
             ncoins, 
-            npoints,  
-            RANK() OVER (ORDER BY npoints DESC) AS rank
+          npoints,
+          RANK() OVER (ORDER BY npoints DESC) AS rank
         FROM users u
-        JOIN user_details ud ON u.id = ud.user_id
-        JOIN user_roles ur ON u.id = ur.user_id
         JOIN user_job_titles ujt ON u.id = ujt.user_id
         JOIN departments d ON u.department_id = d.id
+        JOIN user_details ud ON u.id = ud.user_id
         ORDER BY ncoins DESC
         LIMIT 10;
         """
