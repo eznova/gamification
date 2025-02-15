@@ -148,7 +148,7 @@ def get_unverified_achievements(): return achievments.get_unverified_achievement
 def verify_achievement(): return achievments.verify_achievement()
 
 ################################# TASKS ENDPOINTS ##################################
-@app.route('/tasks/get', methods=['GET'])
+@app.route('/tasks/get', methods=['POST'])
 def get_season_tasks(): return tasks.get_season_tasks()
 
 @app.route('/tasks/add/result', methods=['POST'])

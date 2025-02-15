@@ -5,14 +5,15 @@ from flask import request
 
 def get_season_tasks():
     try:
+        data = request.get_json()
         conn = get_db_connection()
         cursor = conn.cursor()
         query = """
             SELECT id, task_name, task_description, task_weight, is_open
             FROM tasks
-            WHERE is_open = TRUE AND id NOT IN (SELECT task_id FROM user_tasks)
+            WHERE is_open = TRUE AND id NOT IN (SELECT task_id FROM user_tasks WHERE user_id = %s)
         """
-        cursor.execute(query)
+        cursor.execute(query, data['user_id'])
         tasks = cursor.fetchall()
         cursor.close()
         conn.close()

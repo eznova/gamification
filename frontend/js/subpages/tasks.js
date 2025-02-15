@@ -4,14 +4,29 @@ const backendUrl = localStorage.getItem('backendUrl');
 
 // Функция для получения всех задач
 function getTasks(userId, backendUrl) {
-    return fetch(`${backendUrl}/tasks/get`)
-        .then(res => res.json())
-        .then(tasks => tasks)  // Возвращаем задачи в исходной структуре
-        .catch(error => {
-            console.error('Error:', error);
-            return [];  // В случае ошибки возвращаем пустой массив
-        });
+    return fetch(`${backendUrl}/tasks/get`, {
+        headers: {
+            'Authorization': `Bearer ${userId}`,
+            'Content-Type': 'application/json'
+        },
+        method: 'POST',
+        body: JSON.stringify({
+            'user_id': userId
+        })
+    })
+    .then(res => {
+        if (!res.ok) {
+            throw new Error(`HTTP error! Status: ${res.status}`);
+        }
+        return res.json();
+    })
+    .then(tasks => tasks)  // Возвращаем задачи в исходной структуре
+    .catch(error => {
+        console.error('Error:', error);
+        return [];  // В случае ошибки возвращаем пустой массив
+    });
 }
+
 
 // Функция для создания карточки задачи
 function createTaskCard(userId, task) {
