@@ -50,14 +50,18 @@ document.addEventListener('DOMContentLoaded', function () {
     form.appendChild(aboutYou);
 
     // Вынесенная функция для создания input с label
-    function createInputWithLabel(id, labelText, secondaryText, placeholder) {
+    function createInputWithLabel(id, labelText, secondaryText, placeholder, type) {
+        if (!type) {
+            type = 'text';
+        }
         const codeField = document.createElement('input');
         codeField.classList.add('form-control', 'mb-3');
         codeField.setAttribute('required', 'false');
         codeField.setAttribute('type', 'text');
         codeField.setAttribute('name', id);
         codeField.setAttribute('id', id);  // Добавляем id
-        codeField.setAttribute('placeholder', placeholder);
+        codeField.setAttribute('placeholder', placeholder); 
+        codeField.setAttribute('type', type);
 
         const codeLabel = document.createElement('label');
         codeLabel.setAttribute('for', id); // Связываем label с полем через id
@@ -122,7 +126,8 @@ document.addEventListener('DOMContentLoaded', function () {
         'code', 
         'Код регистрации*', 
         'Получите код регистрации у HR', 
-        'введите код'
+        'введите код',
+        'password'
     );
 
     const { codeField: surnameField, codeLabel: surnameLabel } = createInputWithLabel(
@@ -146,12 +151,32 @@ document.addEventListener('DOMContentLoaded', function () {
         'введите ваше отчество'
     );
 
-    const { codeField: birthdateField, codeLabel: birthdateLabel } = createInputWithLabel(
-        'birthdate', 
-        'Дата рождения*', 
-        '', 
-        'введите дату рождения'
-    );
+    const dateField = document.createElement('input');
+    dateField.classList.add('form-control', 'mb-3');
+    dateField.setAttribute('type', 'date');
+    dateField.setAttribute('name', 'birthdate');
+    dateField.setAttribute('id', 'birthdate');
+    dateField.setAttribute('placeholder', 'введите дату рождения');
+
+    // Ограничиваем выбор дат (пользователь не может выбрать будущее)
+    const today = new Date().toISOString().split('T')[0]; 
+    dateField.setAttribute('max', today);
+
+    const dateLabel = document.createElement('label');
+    dateLabel.setAttribute('for', 'birthdate');
+
+    const firstLine = document.createElement('span');
+    firstLine.textContent = 'Дата рождения*';
+    firstLine.classList.add('form-labels');
+
+    const secondLine = document.createElement('span');
+    secondLine.textContent = '';
+    secondLine.classList.add('card-text-secondary', 'form-labels');
+
+    dateLabel.appendChild(firstLine);
+    dateLabel.appendChild(document.createElement('br'));
+    dateLabel.appendChild(secondLine);
+
 
     const { codeField: hobbiesField, codeLabel: hobbiesLabel } = createInputWithLabel(
         'hobbies', 
@@ -173,8 +198,8 @@ document.addEventListener('DOMContentLoaded', function () {
     form.appendChild(patronymicLabel);
     form.appendChild(patronymicField);
 
-    form.appendChild(birthdateLabel);
-    form.appendChild(birthdateField);
+    form.appendChild(dateLabel);
+    form.appendChild(dateField);
 
     form.appendChild(hobbiesLabel);
     form.appendChild(hobbiesField);
@@ -210,6 +235,34 @@ document.addEventListener('DOMContentLoaded', function () {
         'Пожалуйста, выберите фактическое подразделение, где вы работаете', 
         'выберите подразделение'
     );
+
+    // Дата начала работы
+    const jobStartField = document.createElement('input');
+    jobStartField.classList.add('form-control', 'mb-3');
+    jobStartField.setAttribute('type', 'date');
+    jobStartField.setAttribute('name', 'jobStartDate');
+    jobStartField.setAttribute('id', 'jobStartDate');
+    jobStartField.setAttribute('placeholder', 'введите день начала работы');
+
+    // Ограничиваем выбор дат (пользователь не может выбрать будущее)
+    const jobToday = new Date().toISOString().split('T')[0]; 
+    jobStartField.setAttribute('max', jobToday);
+
+    const jobStartLabel = document.createElement('label');
+    jobStartLabel.setAttribute('for', 'jobStartDate');
+
+    const jobFirstLine = document.createElement('span');
+    jobFirstLine.textContent = 'День начала работы*';
+    jobFirstLine.classList.add('form-labels');
+
+    const jobSecondLine = document.createElement('span');
+    jobSecondLine.textContent = '';
+    jobSecondLine.classList.add('card-text-secondary', 'form-labels');
+
+    jobStartLabel.appendChild(jobFirstLine);
+    jobStartLabel.appendChild(document.createElement('br'));
+    jobStartLabel.appendChild(jobSecondLine);
+
     // Проекты
     const { codeField: projectsField, codeLabel: projectsLabel } = createInputWithLabel(
         'projects', 
@@ -227,6 +280,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     form.appendChild(departmentLabel);
     form.appendChild(departmentField);
+
+    form.appendChild(jobStartLabel);
+    form.appendChild(jobStartField);
 
     form.appendChild(projectsLabel);   
     form.appendChild(projectsField);
@@ -291,7 +347,8 @@ document.addEventListener('DOMContentLoaded', function () {
         'password', 
         'Придумайте пароль*', 
         '', 
-        'введите пароль'
+        'введите пароль',
+        'password'
     );
 
     // Подтверждение пароля
@@ -299,7 +356,8 @@ document.addEventListener('DOMContentLoaded', function () {
         'confirmPassword', 
         'Повторите пароль*', 
         '', 
-        'введите пароль'
+        'введите пароль',
+        'password'
     );
 
     // Добавляем созданные элементы в форму
