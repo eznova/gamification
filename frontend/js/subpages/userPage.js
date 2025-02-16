@@ -4,144 +4,136 @@ import { initMyPageEventHandlers } from "../upload.js";
 const currentUser = localStorage.getItem('current_user_id');
 const backendUrl = localStorage.getItem('backendUrl');
 
-export function loadUserPageContent(userId, backendUrl, signal) {
+export async function loadUserPageContent(userId, backendUrl, signal) {
     console.log(`Загружаем страницу пользователя ${userId}: ${backendUrl}`);
     localStorage.setItem('user_id', userId);
     const content = document.getElementById('content');
+    const response = await fetch('subpages/user-page.html', { signal });
+    if (!response.ok) {
+        throw new Error('Ошибка загрузки шаблона');
+    }
+    const template = await response.text();
+    content.innerHTML = template;
+    const userContent = document.getElementById('user-content');
+
+    // Инициализация переменной для отображения всех пользователей
+    const teamMembersGridDiv = document.createElement('div');
     
-    fetch('subpages/user-page.html', { signal })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Ошибка загрузки шаблона');
-        }
-        return response.text();
-    })
-    .then(template => {
-        content.innerHTML = template;
-        const userContent = document.getElementById('user-content');
+    // Загружаем данные о пользователе
+    return Promise.all([
+        fetch(`${backendUrl}/users/get/${userId}/personal`).then(res => res.json()),
+        fetch(`${backendUrl}/users/get/${userId}/photo`).then(res => res.blob()),
+        fetch(`${backendUrl}/users/get/${userId}/job_info`).then(res => res.json()),
+        fetch(`${backendUrl}/users/get/${userId}/details`).then(res => res.json())
+    ])
+    .then(([personalData, photoBlob, jobInfoData, detailsData]) => {
+        const jobTitle = jobInfoData.job_titles[0]?.title || '';
+        const projects = jobInfoData.job_titles[0]?.projects || '';
+        const department = jobInfoData.job_titles[0]?.department || '';
+        const role = jobInfoData.job_titles[0]?.role || '';
 
-        // Инициализация переменной для отображения всех пользователей
-        const teamMembersGridDiv = document.createElement('div');
-        
-        // Загружаем данные о пользователе
-        return Promise.all([
-            fetch(`${backendUrl}/users/get/${userId}/personal`).then(res => res.json()),
-            fetch(`${backendUrl}/users/get/${userId}/photo`).then(res => res.blob()),
-            fetch(`${backendUrl}/users/get/${userId}/job_info`).then(res => res.json()),
-            fetch(`${backendUrl}/users/get/${userId}/details`).then(res => res.json())
-        ])
-        .then(([personalData, photoBlob, jobInfoData, detailsData]) => {
-            const jobTitle = jobInfoData.job_titles[0]?.title || '';
-            const projects = jobInfoData.job_titles[0]?.projects || '';
-            const department = jobInfoData.job_titles[0]?.department || '';
-            const role = jobInfoData.job_titles[0]?.role || '';
+        // Создаём URL для Blob
+        const photoSrc = URL.createObjectURL(photoBlob);
+        const data = {
+            ...personalData,
+            photo: photoSrc,
+            job_title: jobTitle,
+            projects: projects,
+            department: department,
+            role: role,
+            interests: detailsData.interests,
+            ncoins: detailsData.ncoins === 0 ? "0" : detailsData.ncoins,
+            npoints: detailsData.npoints === 0 ? "0" : detailsData.npoints,
+        };
 
-            // Создаём URL для Blob
-            const photoSrc = URL.createObjectURL(photoBlob);
-            const data = {
-                ...personalData,
-                photo: photoSrc,
-                job_title: jobTitle,
-                projects: projects,
-                department: department,
-                role: role,
-                interests: detailsData.interests,
-                ncoins: detailsData.ncoins === 0 ? "0" : detailsData.ncoins,
-                npoints: detailsData.npoints === 0 ? "0" : detailsData.npoints,
-            };
+        // Создание карточки пользователя
+        const userCard = createUserCard(data);
+        userContent.appendChild(userCard);
 
-            // Создание карточки пользователя
-            const userCard = createUserCard(data);
-            userContent.appendChild(userCard);
+        // Применяем CSS Grid для контейнера с пользователями
+        teamMembersGridDiv.style.display = 'grid';
+        teamMembersGridDiv.style.gridTemplateColumns = 'repeat(2, 1fr)'; // 2 колонки
+        teamMembersGridDiv.style.gridGap = '20px'; // Отступы между элементами
 
-            // Применяем CSS Grid для контейнера с пользователями
-            teamMembersGridDiv.style.display = 'grid';
-            teamMembersGridDiv.style.gridTemplateColumns = 'repeat(2, 1fr)'; // 2 колонки
-            teamMembersGridDiv.style.gridGap = '20px'; // Отступы между элементами
+        return fetch(`${backendUrl}/users/get/${userId}/team`)
+            .then(res => res.json())
+            .then(allUsers => {
+                // Создание строки пользователя
+                const createUserRow = (user) => {
+                    if (user.id !== userId) {
+                        const userDiv = document.createElement('div');
+                        userDiv.classList.add('user-row', 'row');
+                        userDiv.style.alignItems = 'center';
 
-            return fetch(`${backendUrl}/users/get/${userId}/team`)
-                .then(res => res.json())
-                .then(allUsers => {
-                    // Создание строки пользователя
-                    const createUserRow = (user) => {
-                        if (user.id !== userId) {
-                            const userDiv = document.createElement('div');
-                            userDiv.classList.add('user-row', 'row');
-                            userDiv.style.alignItems = 'center';
-
-                            // Создаем первый div для изображения
-                            const col1 = document.createElement('div');
-                            col1.classList.add('col-1');
-                            const img = document.createElement('img');
-                            img.setAttribute('width', '30px');
-                            img.setAttribute('height', '30px');
-                            img.classList.add('rounded-circle');
-                            fetch(`${backendUrl}/users/get/${user.id}/photo`)
-                                .then(res => res.blob())
-                                .then(photoBlob => {
-                                    const photoUrl = URL.createObjectURL(photoBlob);
-                                    img.setAttribute('src', photoUrl);
-                                });
-                            col1.appendChild(img);
-                            userDiv.appendChild(col1);
-
-                            // Создаем второй div для имени и должности
-                            const col2 = document.createElement('div');
-                            col2.classList.add('col-9');
-                            const nameDiv = document.createElement('div');
-                            nameDiv.classList.add('font-weight-bold');
-                            nameDiv.textContent = `${user.name} ${user.surname}`;
-                            const detailsDiv = document.createElement('div');
-                            detailsDiv.classList.add('text-muted', 'small');
-                            detailsDiv.textContent = `${user.job_role}`;
-                            col2.appendChild(nameDiv);
-                            col2.appendChild(detailsDiv);
-
-                            // Добавляем обработчик клика
-                            col2.style.cursor = 'pointer';
-                            col2.addEventListener('click', () => {
-                                loadUserPageContent(user.id, backendUrl); // Загрузка страницы другого пользователя
+                        // Создаем первый div для изображения
+                        const col1 = document.createElement('div');
+                        col1.classList.add('col-1');
+                        const img = document.createElement('img');
+                        img.setAttribute('width', '30px');
+                        img.setAttribute('height', '30px');
+                        img.classList.add('rounded-circle');
+                        fetch(`${backendUrl}/users/get/${user.id}/photo`)
+                            .then(res => res.blob())
+                            .then(photoBlob => {
+                                const photoUrl = URL.createObjectURL(photoBlob);
+                                img.setAttribute('src', photoUrl);
                             });
+                        col1.appendChild(img);
+                        userDiv.appendChild(col1);
 
-                            // Добавляем колонки в контейнер
-                            userDiv.appendChild(col1);
-                            userDiv.appendChild(col2);
-                            return userDiv;
-                        }
-                    };
+                        // Создаем второй div для имени и должности
+                        const col2 = document.createElement('div');
+                        col2.classList.add('col-9');
+                        const nameDiv = document.createElement('div');
+                        nameDiv.classList.add('font-weight-bold');
+                        nameDiv.textContent = `${user.name} ${user.surname}`;
+                        const detailsDiv = document.createElement('div');
+                        detailsDiv.classList.add('text-muted', 'small');
+                        detailsDiv.textContent = `${user.job_role}`;
+                        col2.appendChild(nameDiv);
+                        col2.appendChild(detailsDiv);
 
-                    // Перебираем всех пользователей и добавляем их в DOM
-                    allUsers.forEach(user => {
-                        if (user.id !== userId) {
-                            const userRow = createUserRow(user);
-                            teamMembersGridDiv.appendChild(userRow);
-                        }
-                    });
+                        // Добавляем обработчик клика
+                        col2.style.cursor = 'pointer';
+                        col2.addEventListener('click', () => {
+                            loadUserPageContent(user.id, backendUrl); // Загрузка страницы другого пользователя
+                        });
 
-                    const teamCard = document.createElement('div');
-                    teamCard.classList.add('card', 'mb-3');
-                    teamCard.style.width = '100%';
-                    teamCard.style.padding = '3em';
-                    const teamCardTitle = document.createElement('div');
-                    teamCardTitle.classList.add('card-inner-title');
-                    teamCardTitle.textContent = 'Команда';
-                    teamCardTitle.style.paddingBottom = '1em';
-                    teamCard.appendChild(teamCardTitle);
-                    teamCard.appendChild(teamMembersGridDiv);
+                        // Добавляем колонки в контейнер
+                        userDiv.appendChild(col1);
+                        userDiv.appendChild(col2);
+                        return userDiv;
+                    }
+                };
 
-                    userContent.appendChild(teamCard);
-
-                    if (userId === userId) { // Может быть здесь логика для проверки текущего пользователя
-                        initMyPageEventHandlers();  // Инициализация обработчиков событий для своей страницы
+                // Перебираем всех пользователей и добавляем их в DOM
+                allUsers.forEach(user => {
+                    if (user.id !== userId) {
+                        const userRow = createUserRow(user);
+                        teamMembersGridDiv.appendChild(userRow);
                     }
                 });
-        })
-        .catch(error => {
-            content.innerHTML = `<p class="text-danger">Ошибка: ${error.message}</p>`;
-        });
+
+                const teamCard = document.createElement('div');
+                teamCard.classList.add('card', 'mb-3');
+                teamCard.style.width = '100%';
+                teamCard.style.padding = '3em';
+                const teamCardTitle = document.createElement('div');
+                teamCardTitle.classList.add('card-inner-title');
+                teamCardTitle.textContent = 'Команда';
+                teamCardTitle.style.paddingBottom = '1em';
+                teamCard.appendChild(teamCardTitle);
+                teamCard.appendChild(teamMembersGridDiv);
+
+                userContent.appendChild(teamCard);
+
+                if (userId === userId) { // Может быть здесь логика для проверки текущего пользователя
+                    initMyPageEventHandlers();  // Инициализация обработчиков событий для своей страницы
+                }
+            });
     })
     .catch(error => {
-        content.innerHTML = `<p class="text-danger">Ошибка загрузки шаблона: ${error.message}</p>`;
+        content.innerHTML = `<p class="text-danger">Ошибка: ${error.message}</p>`;
     });
 }
 
