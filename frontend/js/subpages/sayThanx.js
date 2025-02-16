@@ -5,176 +5,176 @@ import { loadUserPageContent } from './userPage.js';
 
 const currentUserId = localStorage.getItem('user_id');
 
-export function loadSayThanxContent(userId, backendUrl) {
+export async function loadSayThanxContent(userId, backendUrl, signal) {
     const content = document.getElementById('content');
-    fetch('subpages/say-thanx.html')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Ошибка загрузки шаблона');
-            }
-            return response.text();
-        })
-        .then(template => {
-            content.innerHTML = template;
-            const searchContainer = document.createElement('div');
-            searchContainer.classList.add('row');
-            // Добавляем поле для поиска
-            const searchInputDiv = document.createElement('div');
-            searchInputDiv.classList.add('col-6');
-            const searchInput = document.createElement('input');
-            searchInput.type = 'text';
-            searchInput.id = 'user-search';
-            searchInput.classList.add('form-control');
-            searchInput.placeholder = 'Поиск коллег';
-            searchInput.style.marginBottom = '10px';
-            searchInputDiv.appendChild(searchInput);
-            searchContainer.appendChild(searchInputDiv);
+    const response = await fetch('subpages/say-thanx.html')
+    if (!response.ok) throw new Error('Ошибка загрузки шаблона');
+    const template = await response.text();
+    content.innerHTML = template;
+    const searchContainer = document.createElement('div');
+    searchContainer.classList.add('row');
+    // Добавляем поле для поиска
+    const searchInputDiv = document.createElement('div');
+    searchInputDiv.classList.add('col-6');
+    const searchInput = document.createElement('input');
+    searchInput.type = 'text';
+    searchInput.id = 'user-search';
+    searchInput.classList.add('form-control');
+    searchInput.placeholder = 'Поиск коллег';
+    searchInput.style.marginBottom = '10px';
+    searchInputDiv.appendChild(searchInput);
+    searchContainer.appendChild(searchInputDiv);
 
-            const thanxLeftDiv = document.createElement('div');
-            thanxLeftDiv.classList.add('col-6');
-            const thanxLeft = document.createElement('input');
-            thanxLeft.type = 'text';
-            thanxLeft.readOnly = true;
-            thanxLeft.disabled = true;
-            thanxLeft.classList.add('form-control', 'user-card-text');
-            thanxLeft.style.outline = 'none';
-            fetch(`${backendUrl}/thx/get/${currentUserId}`)
-                .then(res => res.json())
-                .then(data => {
-                    console.log(data);
-                    thanxLeft.placeholder = `Осталось спасибо: ${data.thx_count} / ${data.max_thx}`;
-                    thanxLeftDiv.appendChild(thanxLeft);
-                })
-            searchContainer.appendChild(thanxLeftDiv);
-            content.appendChild(searchContainer);
+    const thanxLeftDiv = document.createElement('div');
+    thanxLeftDiv.classList.add('col-6');
+    const thanxLeft = document.createElement('input');
+    thanxLeft.type = 'text';
+    thanxLeft.readOnly = true;
+    thanxLeft.disabled = true;
+    thanxLeft.classList.add('form-control', 'user-card-text');
+    thanxLeft.style.outline = 'none';
+    // use await
+    const thx_result = await fetch(`${backendUrl}/thx/get/${currentUserId}`, { signal });
+    const data = await thx_result.json();
+    const thx_count = data.thx_count;
+    const max_thx = data.max_thx;
+    thanxLeft.placeholder = `Осталось спасибо: ${thx_count} / ${max_thx}`;
 
-            const searchHr = document.createElement('hr');
-            searchHr.style.marginTop = '1em';
-            searchHr.style.marginBottom = '1em';
-            content.appendChild(searchHr);
+        // .then(data => {
+        //     console.log(data);
+        //     thanxLeft.placeholder = `Осталось спасибо: ${data.thx_count} / ${data.max_thx}`;
+        //     thanxLeftDiv.appendChild(thanxLeft);
+        // })
+    thanxLeftDiv.appendChild(thanxLeft);
+    searchContainer.appendChild(thanxLeftDiv);
+    content.appendChild(searchContainer);
 
-
-            const sayThanxForm = document.getElementById('say-thanx-content');
-            
-            // Применяем CSS Grid для контейнера с пользователями
-            sayThanxForm.style.display = 'grid';
-            sayThanxForm.style.gridTemplateColumns = 'repeat(2, 1fr)'; // 2 колонки
-            sayThanxForm.style.gridGap = '20px'; // Отступы между элементами
+    const searchHr = document.createElement('hr');
+    searchHr.style.marginTop = '1em';
+    searchHr.style.marginBottom = '1em';
+    content.appendChild(searchHr);
 
 
+    const sayThanxForm = document.getElementById('say-thanx-content');
+    
+    // Применяем CSS Grid для контейнера с пользователями
+    sayThanxForm.style.display = 'grid';
+    sayThanxForm.style.gridTemplateColumns = 'repeat(2, 1fr)'; // 2 колонки
+    sayThanxForm.style.gridGap = '20px'; // Отступы между элементами
 
 
-            return Promise.all([ 
-                fetch(`${backendUrl}/users/get/all`).then(res => res.json())
-            ])
-                .then(([allUsers]) => {
-                    // Используем данные, возвращаемые API
-                    // console.log(allUsers); // Проверяем, что пришло от API
 
-                    const createUserRow = (user) => {
-                        if (user.id != currentUserId) {
-                        
 
-                            const userDiv = document.createElement('div');
-                            userDiv.classList.add('user-row', 'row');
-                            // userDiv.style.display = 'flex';
-                            userDiv.style.alignItems = 'center';
+    return Promise.all([ 
+        fetch(`${backendUrl}/users/get/all`).then(res => res.json())
+    ])
+        .then(([allUsers]) => {
+            // Используем данные, возвращаемые API
+            // console.log(allUsers); // Проверяем, что пришло от API
 
-                            // Первый div для изображения
-                            const col1 = document.createElement('div');
-                            col1.classList.add('col-1');
-                            const img = document.createElement('img');
-                            img.setAttribute('width', '30px');
-                            img.setAttribute('height', '30px');
-                            img.classList.add('rounded-circle');
-                            fetch(`${backendUrl}/users/get/${user.id}/photo`)
-                                .then(res => res.blob())
-                                .then(photoBlob => {
-                                    // Создаем URL для изображения
-                                    const photoUrl = URL.createObjectURL(photoBlob);
-                                    img.setAttribute('src', photoUrl);
-                                })
-                            col1.appendChild(img);
-                            userDiv.appendChild(col1);
+            const createUserRow = (user) => {
+                if (user.id != currentUserId) {
+                
 
-                            const col2 = document.createElement('div');
-                            col2.classList.add('col-9');
-                            // col2.style.flex = '1'; // Даем второй колонке больше пространства
+                    const userDiv = document.createElement('div');
+                    userDiv.classList.add('user-row', 'row');
+                    // userDiv.style.display = 'flex';
+                    userDiv.style.alignItems = 'center';
 
-                            // Создаем внутренние элементы для второй колонки
-                            const nameDiv = document.createElement('div');
-                            nameDiv.classList.add('user-card-text');
-                            nameDiv.textContent = `${user.name} ${user.surname}`;
+                    // Первый div для изображения
+                    const col1 = document.createElement('div');
+                    col1.classList.add('col-1');
+                    const img = document.createElement('img');
+                    img.setAttribute('width', '30px');
+                    img.setAttribute('height', '30px');
+                    img.classList.add('rounded-circle');
+                    fetch(`${backendUrl}/users/get/${user.id}/photo`)
+                        .then(res => res.blob())
+                        .then(photoBlob => {
+                            // Создаем URL для изображения
+                            const photoUrl = URL.createObjectURL(photoBlob);
+                            img.setAttribute('src', photoUrl);
+                        })
+                    col1.appendChild(img);
+                    userDiv.appendChild(col1);
 
-                            const detailsDiv = document.createElement('div');
-                            detailsDiv.classList.add('user-card-text-secondary');
-                            detailsDiv.textContent = `${user.job_title} | ${user.job_role} | ${user.department_name}`;
+                    const col2 = document.createElement('div');
+                    col2.classList.add('col-9');
+                    // col2.style.flex = '1'; // Даем второй колонке больше пространства
 
-                            // Добавляем две строки (имя и должность, роль, департамент) в колонку
-                            col2.appendChild(nameDiv);
-                            col2.appendChild(detailsDiv);
-                            col2.style.cursor = 'hand';
-                            col2.addEventListener('mouseover', function() {
-                                this.style.cursor = 'pointer'; // меняем курсор на ладошку
-                            });
-                            col2.addEventListener('click', () => {
-                                // alert(`Вы выбрали пользователя с ID: ${user.id}`);
-                                loadUserPageContent(user.id, backendUrl);  // Вызов функции с передачей user.id
-                            });
+                    // Создаем внутренние элементы для второй колонки
+                    const nameDiv = document.createElement('div');
+                    nameDiv.classList.add('user-card-text');
+                    nameDiv.textContent = `${user.name} ${user.surname}`;
 
-                            const col3 = document.createElement('div');
-                            col3.classList.add('col-2');
-                            col3.style.textAlign = 'right';
-                            
-                            const thanxImg = document.createElement('img');
-                            thanxImg.setAttribute('src', 'imgs/icons/v/hand.svg');
-                            thanxImg.setAttribute('width', '30px');
-                            thanxImg.setAttribute('height', '30px');
-                            thanxImg.classList.add('rounded-circle');
-                            thanxImg.addEventListener('mouseover', function() {
-                                this.style.cursor = 'pointer';
-                            })
-                            thanxImg.addEventListener('click', () => {
-                                // alert(`Вы выбрали пользователя с ID: ${user.id}`);
-                                loadSayThanxForm(user.id, backendUrl);  // Вызов функции с передачей user.id
-                            });
-                            col3.appendChild(thanxImg);
+                    const detailsDiv = document.createElement('div');
+                    detailsDiv.classList.add('user-card-text-secondary');
+                    detailsDiv.textContent = `${user.job_title} | ${user.job_role} | ${user.department_name}`;
 
-                            // Добавляем колонки в контейнер пользователя
-                            userDiv.appendChild(col1);
-                            userDiv.appendChild(col2);
-                            userDiv.appendChild(col3);
-
-                            return userDiv;
-                        }
-                    };
-
-                    // Перебираем всех пользователей и добавляем их в DOM
-                    allUsers.forEach(user => {
-                        if (user.id != currentUserId) {
-                            const userRow = createUserRow(user);
-                            sayThanxForm.appendChild(userRow);
-                        }
+                    // Добавляем две строки (имя и должность, роль, департамент) в колонку
+                    col2.appendChild(nameDiv);
+                    col2.appendChild(detailsDiv);
+                    col2.style.cursor = 'hand';
+                    col2.addEventListener('mouseover', function() {
+                        this.style.cursor = 'pointer'; // меняем курсор на ладошку
+                    });
+                    col2.addEventListener('click', () => {
+                        // alert(`Вы выбрали пользователя с ID: ${user.id}`);
+                        loadUserPageContent(user.id, backendUrl);  // Вызов функции с передачей user.id
                     });
 
-                    // Фильтрация пользователей при вводе текста
-                    searchInput.addEventListener('input', () => {
-                        const searchValue = searchInput.value.toLowerCase();
-                        const userDivs = sayThanxForm.querySelectorAll('.user-row'); // Получаем список всех пользователей
-
-                        userDivs.forEach(userDiv => {
-                            const name = userDiv.querySelector('.user-card-text').textContent.toLowerCase();
-                            const details = userDiv.querySelector('.user-card-text-secondary').textContent.toLowerCase();
-                            if (name.includes(searchValue) || details.includes(searchValue)) {
-                                userDiv.style.display = 'flex';
-                            } else {
-                                userDiv.style.display = 'none';
-                            }
-                        });
-                    });
+                    const col3 = document.createElement('div');
+                    col3.classList.add('col-2');
+                    col3.style.textAlign = 'right';
                     
-                    content.appendChild(sayThanxForm);
+                    const thanxImg = document.createElement('img');
+                    thanxImg.setAttribute('src', 'imgs/icons/v/hand.svg');
+                    thanxImg.setAttribute('width', '30px');
+                    thanxImg.setAttribute('height', '30px');
+                    thanxImg.classList.add('rounded-circle');
+                    thanxImg.addEventListener('mouseover', function() {
+                        this.style.cursor = 'pointer';
+                    })
+                    thanxImg.addEventListener('click', () => {
+                        // alert(`Вы выбрали пользователя с ID: ${user.id}`);
+                        loadSayThanxForm(user.id, backendUrl);  // Вызов функции с передачей user.id
+                    });
+                    col3.appendChild(thanxImg);
+
+                    // Добавляем колонки в контейнер пользователя
+                    userDiv.appendChild(col1);
+                    userDiv.appendChild(col2);
+                    userDiv.appendChild(col3);
+
+                    return userDiv;
+                }
+            };
+
+            // Перебираем всех пользователей и добавляем их в DOM
+            allUsers.forEach(user => {
+                if (user.id != currentUserId) {
+                    const userRow = createUserRow(user);
+                    sayThanxForm.appendChild(userRow);
+                }
+            });
+
+            // Фильтрация пользователей при вводе текста
+            searchInput.addEventListener('input', () => {
+                const searchValue = searchInput.value.toLowerCase();
+                const userDivs = sayThanxForm.querySelectorAll('.user-row'); // Получаем список всех пользователей
+
+                userDivs.forEach(userDiv => {
+                    const name = userDiv.querySelector('.user-card-text').textContent.toLowerCase();
+                    const details = userDiv.querySelector('.user-card-text-secondary').textContent.toLowerCase();
+                    if (name.includes(searchValue) || details.includes(searchValue)) {
+                        userDiv.style.display = 'flex';
+                    } else {
+                        userDiv.style.display = 'none';
+                    }
                 });
+            });
+            
+            content.appendChild(sayThanxForm);
         });
 }
 

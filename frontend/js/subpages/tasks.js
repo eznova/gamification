@@ -226,7 +226,7 @@ function completeTask(task, userId, backendUrl) {
 
 
 // Функция для загрузки задач
-export async function loadTasksContent(userId, backendUrl) {
+export async function loadTasksContent(userId, backendUrl, signal) {
     console.log(`Загружаем задачи пользователя ${userId}: ${backendUrl}`);
     const content = document.getElementById('content');
     try {

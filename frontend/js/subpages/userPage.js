@@ -4,12 +4,12 @@ import { initMyPageEventHandlers } from "../upload.js";
 const currentUser = localStorage.getItem('current_user_id');
 const backendUrl = localStorage.getItem('backendUrl');
 
-export function loadUserPageContent(userId, backendUrl) {
+export function loadUserPageContent(userId, backendUrl, signal) {
     console.log(`Загружаем страницу пользователя ${userId}: ${backendUrl}`);
     localStorage.setItem('user_id', userId);
     const content = document.getElementById('content');
     
-    fetch('subpages/user-page.html')
+    fetch('subpages/user-page.html', { signal })
     .then(response => {
         if (!response.ok) {
             throw new Error('Ошибка загрузки шаблона');

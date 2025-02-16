@@ -2,9 +2,9 @@ const backendUrl = localStorage.getItem('backendUrl');
 
 import { reloadMenu } from '../navbar.js';
 
-export function loadNewsContent(userId, backendUrl) {
+export function loadNewsContent(userId, backendUrl, signal) {
     const content = document.getElementById('content');
-    fetch('subpages/news.html')
+    fetch('subpages/news.html', {signal})
         .then(response => {
             if (!response.ok) throw new Error('Ошибка загрузки шаблона');
             return response.text();
@@ -160,11 +160,11 @@ export function loadNewsContent(userId, backendUrl) {
             });
 
             // Запрос на получение новостей
-            fetch(`${backendUrl}/news/liked_by_user/${userId}`)
+            fetch(`${backendUrl}/news/liked_by_user/${userId}`, {signal})
                 .then(res => res.json())
                 .then(likedData => {
                     const likedNewsIds = new Set(likedData.news_ids);
-                    return fetch(`${backendUrl}/news/get`)
+                    return fetch(`${backendUrl}/news/get`, {signal})
                         .then(res => res.json())
                         .then(news => {
                             news.forEach(newsItem => {

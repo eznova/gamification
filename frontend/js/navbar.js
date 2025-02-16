@@ -79,9 +79,13 @@ import { renderAchievmentsAddPage } from './subpages/achievments-mod.js'
 import { renderPurchasesPage } from './subpages/purchases.js'
 
 
+let abortController = new AbortController();
 
 export function selectNavItem(selectedItem) {
   // console.log(`User ${userId} selected nav item: ${selectedItem.id}`);
+  abortController.abort(); // Отменяем предыдущий запрос
+  abortController = new AbortController(); // Создаем новый контроллер
+
   document.querySelectorAll('.nav-item').forEach(item => {
       item.classList.remove('selected');
       const icon = item.querySelector('.nav-icon');
@@ -94,41 +98,67 @@ export function selectNavItem(selectedItem) {
 
   const content = document.getElementById('content');
 
-  if (selectedItem.id === 'my-page') {
-      loadUserPageContent(userId, backendUrl);
-  } else if (selectedItem.id === 'top10') {
-      loadTop10Content(userId, backendUrl);
-  } else if (selectedItem.id === 'bdays') {
-      loadBdaysContent(userId, backendUrl);
-  } else if (selectedItem.id === 'news') {
-      loadNewsContent(userId, backendUrl);
-  } else if (selectedItem.id === 'say-thanx') {
-      loadSayThanxContent(userId, backendUrl);
-  } else if (selectedItem.id === 'my-achievements') {
-      loadAchievementsContent(userId, backendUrl);
-  } else if (selectedItem.id === 'season-tasks') {
-      loadTasksContent(userId, backendUrl);
-  } else if (selectedItem.id === 'store') {
-      loadStoreContent(userId, backendUrl);
-  } else if (selectedItem.id === 'mems') {
-      loadMemsContent(userId, backendUrl);
-  } else if (selectedItem.id === 'rules') {
-      loadRulesContent(userId, backendUrl);
-  } else if (selectedItem.id === 'roles') {
-      loadRolesPageContent(userId, backendUrl);
-  } else if (selectedItem.id === 'mems-mod') {
-      renderModerationMemsPage(userId, backendUrl);
-  } else if (selectedItem.id === 'quests') {
-      renderQuestsPage(userId, backendUrl);
-  } else if (selectedItem.id === 'achievments-mod') {
-    renderAchievmentsModPage(userId, backendUrl);
-  } else if (selectedItem.id === 'achievments-add') {
-    renderAchievmentsAddPage(userId, backendUrl);
-  } else if (selectedItem.id === 'purchases') {
-    renderPurchasesPage(userId, backendUrl);
-  } else {
-      content.innerHTML = '';
-      content.textContent = `Раздел "${selectedItem.dataset.title}" еще в разработке`;
+  let loadFunction = null;
+  switch (selectedItem.id) {
+    case 'my-page':
+        loadFunction = () => loadUserPageContent(userId, backendUrl, abortController.signal);
+        break;
+    case 'top10':
+        loadFunction = () => loadTop10Content(userId, backendUrl, abortController.signal);
+        break;
+    case 'bdays':
+        loadFunction = () => loadBdaysContent(userId, backendUrl, abortController.signal);
+        break;
+    case 'news':
+        loadFunction = () => loadNewsContent(userId, backendUrl, abortController.signal);
+        break;
+    case 'say-thanx':
+        loadFunction = () => loadSayThanxContent(userId, backendUrl, abortController.signal);
+        break;
+    case 'my-achievements':
+        loadFunction = () => loadAchievementsContent(userId, backendUrl, abortController.signal);
+        break;
+    case 'season-tasks':
+        loadFunction = () => loadTasksContent(userId, backendUrl, abortController.signal);
+        break;
+    case 'store':
+        loadFunction = () => loadStoreContent(userId, backendUrl, abortController.signal);
+        break;
+    case 'mems':
+        loadFunction = () => loadMemsContent(userId, backendUrl, abortController.signal);
+        break;
+    case 'rules':
+        loadFunction = () => loadRulesContent(userId, backendUrl, abortController.signal);
+        break;
+    case 'roles':
+        loadFunction = () => loadRolesPageContent(userId, backendUrl, abortController.signal);
+        break;
+    case 'mems-mod':
+        loadFunction = () => renderModerationMemsPage(userId, backendUrl, abortController.signal);
+        break;
+    case 'quests':
+        loadFunction = () => renderQuestsPage(userId, backendUrl, abortController.signal);
+        break;
+    case 'achievments-mod':
+        loadFunction = () => renderAchievmentsModPage(userId, backendUrl, abortController.signal);
+        break;
+    case 'achievments-add':
+        loadFunction = () => renderAchievmentsAddPage(userId, backendUrl, abortController.signal);
+        break;
+    case 'purchases':
+        loadFunction = () => renderPurchasesPage(userId, backendUrl, abortController.signal);
+        break;
+    default:
+        content.innerHTML = '';
+        content.textContent = `Раздел "${selectedItem.dataset.title}" еще в разработке`;
+        break;
+  }
+  if (loadFunction) {
+    loadFunction().catch(error => {
+        if (error.name !== 'AbortError') {
+            console.error('Ошибка загрузки:', error);
+        }
+    });
   }
 }
 

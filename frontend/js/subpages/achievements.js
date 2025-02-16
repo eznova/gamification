@@ -489,7 +489,7 @@ export function sendAchievment(data, backendUrl) {
 import { checkRoles } from '../rolesController.js';
 
 // Обновленная версия loadAchievementsContent с await
-export async function loadAchievementsContent(userId, backendUrl) {
+export async function loadAchievementsContent(userId, backendUrl, signal) {
     const content = document.getElementById('content'); // Элемент контента, куда вставим top10.html
     try {
         const response = await fetch('subpages/achievements.html'); // Загружаем шаблон
@@ -499,7 +499,7 @@ export async function loadAchievementsContent(userId, backendUrl) {
         const template = await response.text();
         content.innerHTML = template; // Сначала вставляем шаблон в DOM
 
-        const achievmentsResponse = await fetch(`${backendUrl}/achievments/get/all`);
+        const achievmentsResponse = await fetch(`${backendUrl}/achievments/get/all`, { signal });
         const achievments = await achievmentsResponse.json();
         const achievmentsContainer = document.getElementById('achievements-content');
         const pageTitleDiv = document.createElement('div');

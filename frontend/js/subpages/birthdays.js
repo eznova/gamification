@@ -1,6 +1,6 @@
 import { loadUserPageContent } from './userPage.js';
 import { loadSayThanxForm } from "./sayThanx.js";
-export function loadBdaysContent(userId, backendUrl) {
+export function loadBdaysContent(userId, backendUrl, signal) {
     const content = document.getElementById('content'); // Контейнер для вставки шаблона
     fetch('subpages/birthdays.html') // Загружаем HTML-шаблон
         .then(response => {
@@ -13,7 +13,7 @@ export function loadBdaysContent(userId, backendUrl) {
             content.innerHTML = template; // Вставляем шаблон в DOM
             const bdaysList = document.getElementById('bdays-list'); // Теперь bdays-list доступен
 
-            return fetch(`${backendUrl}/users/get/bdays/${new Date().getMonth() + 1}`)
+            return fetch(`${backendUrl}/users/get/bdays/${new Date().getMonth() + 1}`, { signal })
                 .then(res => res.json())
                 .then(bdays => {
                     // console.log("Полученные данные:", bdays);
