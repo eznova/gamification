@@ -3,8 +3,8 @@ const backendUrl = localStorage.getItem('backendUrl');
 
 
 // Функция для получения всех задач
-function getTasks(userId, backendUrl) {
-    return fetch(`${backendUrl}/tasks/get`, {
+async function getTasks(userId, backendUrl, signal) {
+    const response = await fetch(`${backendUrl}/tasks/get`, {
         headers: {
             'Authorization': `Bearer ${userId}`,
             'Content-Type': 'application/json'
@@ -12,19 +12,15 @@ function getTasks(userId, backendUrl) {
         method: 'POST',
         body: JSON.stringify({
             'user_id': userId
-        })
+        }),
+        signal
     })
-    .then(res => {
-        if (!res.ok) {
-            throw new Error(`HTTP error! Status: ${res.status}`);
-        }
-        return res.json();
-    })
-    .then(tasks => tasks)  // Возвращаем задачи в исходной структуре
-    .catch(error => {
-        console.error('Error:', error);
-        return [];  // В случае ошибки возвращаем пустой массив
-    });
+    
+    if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+    const data = await response.json();
+    return data;
 }
 
 
@@ -198,7 +194,7 @@ function completeTask(task, userId, backendUrl) {
     form.addEventListener('submit', async function(e) {
         e.preventDefault(); // Предотвращаем отправку формы по умолчанию
         const taskDescription = textarea.value; // Получаем содержимое textarea
-        fetch(`${backendUrl}/tasks/add/result`, {
+        const response = await fetch(`${backendUrl}/tasks/add/result`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -207,7 +203,8 @@ function completeTask(task, userId, backendUrl) {
                 task_id: task.id,
                 user_id: userId,
                 result: taskDescription
-            })
+            }),
+            signal
         })
         .then(response => {
             return response.json()
@@ -226,8 +223,8 @@ function completeTask(task, userId, backendUrl) {
 
 
 // Функция для загрузки задач
-export async function loadTasksContent(userId, backendUrl) {
-    console.log(`Загружаем задачи пользователя ${userId}: ${backendUrl}`);
+export async function loadTasksContent(userId, backendUrl, signal) {
+    // console.log(`Загружаем задачи пользователя ${userId}: ${backendUrl}`);
     const content = document.getElementById('content');
     try {
         const response = await fetch('subpages/tasks.html');  // Загружаем шаблон
@@ -250,7 +247,7 @@ export async function loadTasksContent(userId, backendUrl) {
             createTaskCard(userId, task);
         });
     } catch (error) {
-        console.error('Error loading tasks:', error);
+        console.log('Loading page was interruptedtasks:', error);
     }
 }
 

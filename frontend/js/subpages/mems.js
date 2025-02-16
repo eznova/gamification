@@ -179,7 +179,7 @@ export async function loadMemsContent(userId, backendUrl) {
         // Контейнер кнопок
         const { buttonContainer, rateButton, uploadButton, addMemResult } = createMemButtons();
 
-        console.log(addMemResult);
+        // console.log(addMemResult);
 
         // Добавляем кнопки в контейнер
         buttonContainer.appendChild(rateButton);
@@ -200,7 +200,7 @@ export async function loadMemsContent(userId, backendUrl) {
         }
 
     } catch (error) {
-        console.error('Error loading mems:', error);
+        console.log('Loading page was interruptedmems:', error);
     }
 }
 
@@ -401,7 +401,7 @@ async function renderMemsPage(userId, backendUrl) {
             console.error('Ошибка загрузки мемов:', error);
         }
     } catch (error) {
-        console.error('Error loading mems:', error);
+        console.log('Loading page was interruptedmems:', error);
     }
 }
 
@@ -711,6 +711,6 @@ export async function renderModerationMemsPage(userId, backendUrl) {
             console.error('Ошибка загрузки мемов:', error);
         }
     } catch (error) {
-        console.error('Error loading mems:', error);
+        console.log('Loading page was interruptedmems:', error);
     }
 }

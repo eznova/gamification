@@ -41,7 +41,7 @@ export function createRuleRow(rule) {
 }
 
 
-export async function loadRulesContent(user_id, backendUrl) {
+export async function loadRulesContent(user_id, backendUrl, signal) {
     const content = document.getElementById('content');
     try {
         const response = await fetch('subpages/rules.html');  // Загружаем шаблон
@@ -66,21 +66,21 @@ export async function loadRulesContent(user_id, backendUrl) {
             });
         }, 0);
 
-        fetch(`${backendUrl}/rules`)
+        fetch(`${backendUrl}/rules`, { signal })
             .then(response => response.json())
             .then(rules => {
                 const rulesList = document.getElementById('rules-list');
                 rulesList.innerHTML += '<script src="js/navbar.js" type="module"></script>';
                 rules.forEach(rule => {
-                    console.log(rule);
+                    // console.log(rule);
                     rulesList.appendChild(createRuleRow(rule));
                 });
             })
             .catch(error => {
-                console.error('Error loading rules:', error);
+                console.log('Loading page was interruptedrules:', error);
             });
 
     } catch (error) {
-        console.error('Error loading rules:', error);
+        console.log('Loading page was interruptedrules:', error);
     }
 }

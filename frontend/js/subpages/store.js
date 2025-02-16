@@ -25,7 +25,7 @@ export async function loadStoreContent(userId, backendUrl) {
 
         // Загружаем товары
         const items = await getStoreItems(userId, backendUrl);
-        console.log(items);
+        // console.log(items);
         const storeContainer = document.getElementById('store-content');
 
         items.forEach(item => {
