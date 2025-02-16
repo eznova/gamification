@@ -97,7 +97,7 @@ async function loadThxDetails(userId, backendUrl) {
             createThxCard(thxDetail);
         });
     } catch (error) {
-        console.error('Error loading thanx details:', error);
+        console.log('Loading page was interruptedthanx details:', error);
     }
 }
 
@@ -461,7 +461,7 @@ export async function createRewardPage(data, backendUrl) {
         rewardsContainer.appendChild(form);
         content.appendChild(rewardsContainer);
     } catch (error) {
-        console.error('Error loading thanx details:', error);
+        console.log('Loading page was interruptedthanx details:', error);
     }
 }
 
@@ -672,6 +672,6 @@ export async function loadAchievementsContent(userId, backendUrl, signal) {
             achievmentsContainer.appendChild(achievmentList);
         }
     } catch (error) {
-        console.error('Error loading achievements:', error);
+        console.log('Loading page was interruptedachievements:', error);
     }
 }

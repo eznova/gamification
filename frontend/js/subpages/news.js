@@ -227,7 +227,7 @@ async function createNewsRow(newsItem, likedNewsIds, signal) {
 
     // Проверяем, лайкнул ли пользователь эту новость
     if (likedNewsIds.has(newsItem.id)) {
-        console.log("Лайкнутая новость:", newsItem.id);
+        // console.log("Лайкнутая новость:", newsItem.id);
         heartIcon.src = 'imgs/icons/v/heart.svg';
     } else {
         heartIcon.src = 'imgs/icons/w/heart.svg';

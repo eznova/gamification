@@ -5,7 +5,7 @@ const currentUser = localStorage.getItem('current_user_id');
 const backendUrl = localStorage.getItem('backendUrl');
 
 export async function loadUserPageContent(userId, backendUrl, signal) {
-    console.log(`Загружаем страницу пользователя ${userId}: ${backendUrl}`);
+    // console.log(`Загружаем страницу пользователя ${userId}: ${backendUrl}`);
     localStorage.setItem('user_id', userId);
     const content = document.getElementById('content');
     const response = await fetch('subpages/user-page.html', { signal });
@@ -144,7 +144,7 @@ function createUserCard(user) {
 
     
 
-    console.log(user);
+    // console.log(user);
     // Создание карточки
     const card = document.createElement('div');
     card.style.padding = '2em';

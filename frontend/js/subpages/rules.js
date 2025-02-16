@@ -72,15 +72,15 @@ export async function loadRulesContent(user_id, backendUrl, signal) {
                 const rulesList = document.getElementById('rules-list');
                 rulesList.innerHTML += '<script src="js/navbar.js" type="module"></script>';
                 rules.forEach(rule => {
-                    console.log(rule);
+                    // console.log(rule);
                     rulesList.appendChild(createRuleRow(rule));
                 });
             })
             .catch(error => {
-                console.error('Error loading rules:', error);
+                console.log('Loading page was interruptedrules:', error);
             });
 
     } catch (error) {
-        console.error('Error loading rules:', error);
+        console.log('Loading page was interruptedrules:', error);
     }
 }
