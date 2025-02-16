@@ -2,193 +2,183 @@ const backendUrl = localStorage.getItem('backendUrl');
 
 import { reloadMenu } from '../navbar.js';
 
-export function loadNewsContent(userId, backendUrl, signal) {
+export async function loadNewsContent(userId, backendUrl, signal) {
     const content = document.getElementById('content');
-    fetch('subpages/news.html', {signal})
-        .then(response => {
-            if (!response.ok) throw new Error('Ошибка загрузки шаблона');
-            return response.text();
-        })
-        .then(template => {
-            content.innerHTML = template;
+    const response = await fetch('subpages/news.html', { signal });
+    if (!response.ok) throw new Error('Ошибка загрузки шаблона');
+    const template = await response.text();
+    content.innerHTML = template;
 
-            // Создаем контейнер для новостей и кнопки
-            const newsContainer = document.createElement('div');
-            newsContainer.classList.add('news-container');
+    // Создаем контейнер для новостей и кнопки
+    const newsContainer = document.createElement('div');
+    newsContainer.classList.add('news-container');
 
-            // Создаем блок для кнопки добавления новости
-            const addNewsDiv = document.createElement('div');
-            addNewsDiv.classList.add('mb-3', 'row');
-            const col1 = document.createElement('div');
-            col1.classList.add('col-8');
-            const col2 = document.createElement('div');
-            col2.classList.add('col-4');
+    // Создаем блок для кнопки добавления новости
+    const addNewsDiv = document.createElement('div');
+    addNewsDiv.classList.add('mb-3', 'row');
+    const col1 = document.createElement('div');
+    col1.classList.add('col-8');
+    const col2 = document.createElement('div');
+    col2.classList.add('col-4');
 
-            const addNewsButton = document.createElement('button');
-            addNewsButton.id = 'add-news';
-            addNewsButton.type = 'button';
-            addNewsButton.classList.add('btn', 'btn-primary');
-            addNewsButton.setAttribute('data-bs-toggle', 'modal');
-            addNewsButton.setAttribute('data-bs-target', '#newsModal');
-            addNewsButton.style.width = '100%';
-            addNewsButton.textContent = 'Добавить новость';
+    const addNewsButton = document.createElement('button');
+    addNewsButton.id = 'add-news';
+    addNewsButton.type = 'button';
+    addNewsButton.classList.add('btn', 'btn-primary');
+    addNewsButton.setAttribute('data-bs-toggle', 'modal');
+    addNewsButton.setAttribute('data-bs-target', '#newsModal');
+    addNewsButton.style.width = '100%';
+    addNewsButton.textContent = 'Добавить новость';
 
-            col2.appendChild(addNewsButton);
-            addNewsDiv.appendChild(col1);
-            addNewsDiv.appendChild(col2);
+    col2.appendChild(addNewsButton);
+    addNewsDiv.appendChild(col1);
+    addNewsDiv.appendChild(col2);
 
-            // Вставляем кнопку в начало новостного контейнера
-            newsContainer.appendChild(addNewsDiv);
+    // Вставляем кнопку в начало новостного контейнера
+    newsContainer.appendChild(addNewsDiv);
 
-            // Создаем контейнер для списка новостей
-            const newsList = document.createElement('div');
-            newsList.id = 'news-list';
-            // newsList.style.maxHeight = '400px';   // Устанавливаем ограничение по высоте для прокрутки
-            // newsList.style.overflowY = 'auto';    // Вертикальная прокрутка
-            newsContainer.appendChild(newsList);
+    // Создаем контейнер для списка новостей
+    const newsList = document.createElement('div');
+    newsList.id = 'news-list';
+    // newsList.style.maxHeight = '400px';   // Устанавливаем ограничение по высоте для прокрутки
+    // newsList.style.overflowY = 'auto';    // Вертикальная прокрутка
+    newsContainer.appendChild(newsList);
 
-            content.innerHTML = '';  // Очищаем текущий контент
-            content.appendChild(newsContainer); // Вставляем новый контейнер с новостями и кнопкой
+    content.innerHTML = '';  // Очищаем текущий контент
+    content.appendChild(newsContainer); // Вставляем новый контейнер с новостями и кнопкой
 
-            // Обработчик кнопки "Добавить новость"
-            addNewsButton.addEventListener('click', () => {
-                newsList.innerHTML = '';  // Очищаем текущий список новостей
+    // Обработчик кнопки "Добавить новость"
+    addNewsButton.addEventListener('click', () => {
+        newsList.innerHTML = '';  // Очищаем текущий список новостей
 
-                const newsDiv = document.createElement('div');
-                newsDiv.classList.add('mb-3');
-                
-                const authNotice = document.createElement('div');
-                authNotice.classList.add('card', 'auth-notice');
-                authNotice.textContent = 'Обратите внимание, что авторство новостей подписывается! Вы всегда можете попросить опубликовать новость HR';
-                newsDiv.appendChild(authNotice);
-                
-                const newsForm = document.createElement('form');
-                newsForm.style.paddingTop = '1em';
-                newsForm.id = 'news-form';
+        const newsDiv = document.createElement('div');
+        newsDiv.classList.add('mb-3');
+        
+        const authNotice = document.createElement('div');
+        authNotice.classList.add('card', 'auth-notice');
+        authNotice.textContent = 'Обратите внимание, что авторство новостей подписывается! Вы всегда можете попросить опубликовать новость HR';
+        newsDiv.appendChild(authNotice);
+        
+        const newsForm = document.createElement('form');
+        newsForm.style.paddingTop = '1em';
+        newsForm.id = 'news-form';
 
-                // Название новости
-                const titleLabel = document.createElement('label');
-                titleLabel.setAttribute('for', 'title');
-                titleLabel.textContent = 'Название новости:';
-                titleLabel.style.paddingBottom = '1em';
-                titleLabel.classList.add('card-title');
-                newsForm.appendChild(titleLabel);
+        // Название новости
+        const titleLabel = document.createElement('label');
+        titleLabel.setAttribute('for', 'title');
+        titleLabel.textContent = 'Название новости:';
+        titleLabel.style.paddingBottom = '1em';
+        titleLabel.classList.add('card-title');
+        newsForm.appendChild(titleLabel);
 
-                const titleInput = document.createElement('input');
-                titleInput.type = 'text';
-                titleInput.id = 'title';
-                titleInput.name = 'title';
-                titleInput.classList.add('form-control', 'mb-3');
-                titleInput.required = true;
-                newsForm.appendChild(titleInput);
+        const titleInput = document.createElement('input');
+        titleInput.type = 'text';
+        titleInput.id = 'title';
+        titleInput.name = 'title';
+        titleInput.classList.add('form-control', 'mb-3');
+        titleInput.required = true;
+        newsForm.appendChild(titleInput);
 
-                // Содержание новости
-                const contentLabel = document.createElement('label');
-                contentLabel.style.paddingTop = '1em';
-                contentLabel.setAttribute('for', 'news-content');
-                contentLabel.textContent = 'Содержание новости:';
-                contentLabel.style.paddingBottom = '1em';
-                contentLabel.classList.add('card-title');
-                newsForm.appendChild(contentLabel);
+        // Содержание новости
+        const contentLabel = document.createElement('label');
+        contentLabel.style.paddingTop = '1em';
+        contentLabel.setAttribute('for', 'news-content');
+        contentLabel.textContent = 'Содержание новости:';
+        contentLabel.style.paddingBottom = '1em';
+        contentLabel.classList.add('card-title');
+        newsForm.appendChild(contentLabel);
 
-                const contentTextarea = document.createElement('textarea');
-                contentTextarea.id = 'news-content';
-                contentTextarea.name = 'content';
-                contentTextarea.classList.add('form-control', 'mb-3');
-                contentTextarea.rows = 6;
-                contentTextarea.required = true;
-                newsForm.appendChild(contentTextarea);
+        const contentTextarea = document.createElement('textarea');
+        contentTextarea.id = 'news-content';
+        contentTextarea.name = 'content';
+        contentTextarea.classList.add('form-control', 'mb-3');
+        contentTextarea.rows = 6;
+        contentTextarea.required = true;
+        newsForm.appendChild(contentTextarea);
 
-                // Кнопки формы
-                const buttonsDiv = document.createElement('div');
-                buttonsDiv.classList.add('d-flex', 'justify-content-end');
+        // Кнопки формы
+        const buttonsDiv = document.createElement('div');
+        buttonsDiv.classList.add('d-flex', 'justify-content-end');
 
-                const cancelButton = document.createElement('div');
-                cancelButton.classList.add('col-2');
-                cancelButton.type = 'button';
-                cancelButton.id = 'cancel-news';
-                cancelButton.style.marginRight = '1em';
-                cancelButton.textContent = 'ОТМЕНА';
-                cancelButton.classList.add('btn', 'btn-gray');
-                cancelButton.addEventListener('click', () => {
-                    loadNewsContent(userId, backendUrl); // Повторная загрузка новостей
-                });
-                buttonsDiv.appendChild(cancelButton);
-
-                const submitButton = document.createElement('button');
-                submitButton.classList.add('col-4');
-                submitButton.type = 'submit';
-                submitButton.id = 'submit-news';
-                submitButton.textContent = 'ОТПРАВИТЬ НОВОСТЬ';
-                submitButton.classList.add('btn', 'btn-primary');
-                buttonsDiv.appendChild(submitButton);
-
-                newsForm.appendChild(buttonsDiv);
-                newsDiv.appendChild(newsForm);
-
-                // Добавляем новость в список
-                newsList.appendChild(newsDiv);
-
-                // Обработчик отправки формы
-                document.getElementById('news-form').addEventListener('submit', (event) => {
-                    event.preventDefault();
-                    const title = document.getElementById('title').value;
-                    const content = document.getElementById('news-content').value;
-
-                    fetch(`${backendUrl}/news/add`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            title: title,
-                            content: content,
-                            author_id: userId
-                        })
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.result === 'success') {
-                            showResultNewsContent(data);
-                        } else {
-                            console.error(data.message);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Ошибка:', error);
-                        alert('Произошла ошибка при отправке новости');
-                    });
-                });
-            });
-
-            // Запрос на получение новостей
-            fetch(`${backendUrl}/news/liked_by_user/${userId}`, {signal})
-                .then(res => res.json())
-                .then(likedData => {
-                    const likedNewsIds = new Set(likedData.news_ids);
-                    return fetch(`${backendUrl}/news/get`, {signal})
-                        .then(res => res.json())
-                        .then(news => {
-                            news.forEach(newsItem => {
-                                createNewsRow(newsItem, likedNewsIds); // Передаем likedNewsIds
-                            });
-                        });
-                })
-                .catch(error => {
-                    console.error('Ошибка при загрузке новостей:', error);
-                    content.innerHTML = '<p>Произошла ошибка при загрузке данных.</p>';
-                });
-        })
-        .catch(error => {
-            console.error('Ошибка:', error);
-            content.innerHTML = '<p>Произошла ошибка при загрузке шаблона.</p>';
-        })
-        .finally(() => {
-            content.style.display = 'block';
+        const cancelButton = document.createElement('div');
+        cancelButton.classList.add('col-2');
+        cancelButton.type = 'button';
+        cancelButton.id = 'cancel-news';
+        cancelButton.style.marginRight = '1em';
+        cancelButton.textContent = 'ОТМЕНА';
+        cancelButton.classList.add('btn', 'btn-gray');
+        cancelButton.addEventListener('click', () => {
+            loadNewsContent(userId, backendUrl); // Повторная загрузка новостей
         });
+        buttonsDiv.appendChild(cancelButton);
+
+        const submitButton = document.createElement('button');
+        submitButton.classList.add('col-4');
+        submitButton.type = 'submit';
+        submitButton.id = 'submit-news';
+        submitButton.textContent = 'ОТПРАВИТЬ НОВОСТЬ';
+        submitButton.classList.add('btn', 'btn-primary');
+        buttonsDiv.appendChild(submitButton);
+
+        newsForm.appendChild(buttonsDiv);
+        newsDiv.appendChild(newsForm);
+
+        // Добавляем новость в список
+        newsList.appendChild(newsDiv);
+
+        // Обработчик отправки формы
+        document.getElementById('news-form').addEventListener('submit', (event) => {
+            event.preventDefault();
+            const title = document.getElementById('title').value;
+            const content = document.getElementById('news-content').value;
+
+            fetch(`${backendUrl}/news/add`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    title: title,
+                    content: content,
+                    author_id: userId
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.result === 'success') {
+                    showResultNewsContent(data);
+                } else {
+                    console.error(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert('Произошла ошибка при отправке новости');
+            });
+        });
+    });
+
+    // Запрос на получение новостей
+    try {
+        const likes_result = await fetch(`${backendUrl}/news/liked_by_user/${userId}`, { signal });
+        const likedData = await likes_result.json();
+
+        const likedNewsIds = new Set(likedData.news_ids);
+
+        const news_result = await fetch(`${backendUrl}/news/get`, { signal });
+        const news = await news_result.json();
+
+        news.forEach(newsItem => {
+            createNewsRow(newsItem, likedNewsIds); // Передаем likedNewsIds
+        });
+    } catch (error) {
+        console.error('Ошибка при загрузке новостей:', error);
+        content.innerHTML = '<p>Произошла ошибка при загрузке данных.</p>';
+    }
+
 }
 
 
 // Функция создания новости
-function createNewsRow(newsItem, likedNewsIds) {
+async function createNewsRow(newsItem, likedNewsIds, signal) {
     // console.log("ID новости:", newsItem.id);
     const newsDiv = document.createElement('div');
     newsDiv.classList.add('card', 'mb-3');
