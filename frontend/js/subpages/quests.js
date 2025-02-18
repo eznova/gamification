@@ -3,12 +3,12 @@ const backendUrl = localStorage.getItem('backendUrl');
 import { reloadMenu } from '../navbar.js';
 
 
-function sendQuestResolution(resolution, quest_id) {
+function sendQuestResolution(resolution, quest_id, user_id) {
     // Создаем объект с данными для отправки
     const data = {
         id: quest_id,
         resolution: resolution, 
-        user_id: userId
+        user_id: user_id
     };
 
     // Отправляем POST-запрос на сервер
@@ -72,7 +72,7 @@ function createTaskCard(task) {
     acceptBtn.style.backgroundSize = 'cover';
     acceptBtn.style.cursor = 'pointer';
     acceptBtn.addEventListener('click', () => {
-        sendQuestResolution('accepted', task.id);
+        sendQuestResolution('accepted', task.id, task.user_id);
     });
 
     // Создаем кнопку "Отклонить"
