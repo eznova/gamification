@@ -52,7 +52,7 @@ export async function checkRoles() {
         let privilegedUser = false;
         if (data.role && Array.isArray(data.role)) {
             data.role.forEach(element => {
-                console.log(element);
+                // console.log(element);
                 if (element.wallet && element.wallet.length > 0) {
                     privilegedUser = true;
                 }

@@ -12,6 +12,12 @@ services:
       - ./:/usr/share/nginx/html
       - ./default.conf:/etc/nginx/conf.d/default.conf:ro
 
+    deploy:
+      resources:
+        limits:
+          cpus: "0.1"
+          memory: 100M
+
 networks:
   webnet:
     driver: bridge
