@@ -1,6 +1,7 @@
 from flask import jsonify, request
 from db import get_db_connection
 from datetime import datetime
+from notifier import *
 
 
 # Эндпоинт для получения новостей
@@ -68,6 +69,8 @@ def add_news():
         # Проверяем, был ли добавлен хотя бы один ряд
         if cursor.rowcount > 0:
             conn.close()
+            notification = {'title': title, 'content': content, 'image': image, 'author': author_id, 'created_at': created_at}
+            send_news_notification(notification)
             return jsonify({'message': 'Новость успешно добавлена', 'result': 'success'}), 200
         else:
             conn.close()

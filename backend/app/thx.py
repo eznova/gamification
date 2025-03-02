@@ -2,6 +2,7 @@ from flask import jsonify, request
 from db import get_db_connection
 from datetime import datetime
 from config import DEFAULT_THX_COUNT
+from notifier import send_thx_notification
 
 
 def add_thx():
@@ -48,6 +49,15 @@ def add_thx():
 
         conn.commit()
         conn.close()
+
+        # send thx notification
+        thx_data = {
+            "reciever_id": reciever_id,
+            "sender_id": sender_id,
+            "created_at": created_at,
+            "message": message
+        }
+        send_thx_notification(thx_data)
         return jsonify(
             {
                 'message': 'Thx added successfully',

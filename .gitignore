@@ -6,3 +6,7 @@ backend/app/__pycache__
 ./backend/app/config.py
 db/.env
 .vscode
+bot/.env
+bot/app/bot.log
+bot/app/__pycache__/
+bot/app/handlers/__pycache__/

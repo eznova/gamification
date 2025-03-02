@@ -3,6 +3,23 @@ from flask import jsonify, request
 from psycopg2.extras import RealDictCursor
 
 
+# get_user_id by tg_id
+def get_user_id():
+    data = request.get_json()
+    tg_id = data.get('tg_id')
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id FROM users WHERE tg_id = %s", (tg_id,))
+    user_id = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    if user_id:
+        print(user_id)
+        return jsonify({"user_id": user_id[0], "status": "success"}), 200
+    else:
+        return jsonify({"user_id": None, "status": "User not found"}), 200
+
+
 # Эндпоинт для получения ncoins и рейтинга пользователя по user_id
 def get_user_details(user_id):
     try:
