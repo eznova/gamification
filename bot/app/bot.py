@@ -39,6 +39,8 @@ def main():
                         if chat_id in thank_colleague_data:
                             # Это сообщение благодарности
                             handle_thank_colleague_text(chat_id, text)
+                        elif chat_id in thank_colleague_input_data:
+                            handle_thank_colleague_input(chat_id, text)
                         else:
                             # Обычное сообщение
                             send_message(chat_id, f"Ваше сообщение: {text}")

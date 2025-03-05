@@ -7,6 +7,7 @@ from config import BACKEND_BASE_URL
 
 user_cache = {}
 thank_colleague_data = {}  # Для хранения данных о том, кто и какой текст благодарности написал
+thank_colleague_input_data = {}  # Для хранения данных о том, кто и какой текст благодарности написал
 
 def handle_thanks_callback(chat_id, callback_data):
     logging.info(f"Обработка callback_data: {callback_data}")
@@ -91,43 +92,54 @@ def handle_thank_colleague_text(chat_id, text):
             send_message(chat_id, "Процесс отправки благодарности не был инициирован. Попробуйте снова.")
 
 def handle_thank_colleague(chat_id):
+    if chat_id in thank_colleague_data: del thank_colleague_data[chat_id]
+    if chat_id in thank_colleague_input_data: del thank_colleague_input_data[chat_id]
+    send_message(chat_id, "Введите часть фамилии коллеги, которого хотите поблагодарить:")
+    thank_colleague_input_data[chat_id] = ""
+    print(thank_colleague_input_data)
+
+def handle_thank_colleague_input(chat_id, text):
+    """Обработчик введенной части фамилии для поиска коллеги."""
     global user_cache
     try:
         response = requests.get(f'{BACKEND_BASE_URL}/users/get/all')
         response.raise_for_status()
         users = response.json()
 
-        grouped_users = {}
-        for user in users:
-            id = user.get('id')
-            surname = user.get('surname', '').strip()
-            first_letter = surname[0].upper() if surname else '#'
-            full_name = f"{id}. {surname} {user.get('name', '')} {user.get('patronymic', '')}".strip()
+        # Фильтруем пользователей по введенной части фамилии (регистр игнорируем)
+        matching_users = [
+            f"{user['id']}. {user['surname']} {user.get('name', '')} {user.get('patronymic', '')}".strip()
+            for user in users
+            if text.lower() in user.get('surname', '').lower()
+        ]
 
-            if first_letter not in grouped_users:
-                grouped_users[first_letter] = []
-            grouped_users[first_letter].append(full_name)
+        # get id
+        response = requests.post(f'{BACKEND_BASE_URL}/users/get/id', json={"tg_id": chat_id})
+        response.raise_for_status()
+        user_id = response.json().get("user_id")
+        status = response.json().get("status")
+        if user_id is None or status == "User not found":
+            send_message(chat_id, "❌ Пользователь не найден.")
+            return
+        for user in matching_users:
+            logging.debug(user)
+            if user.startswith(f'{user_id}.'):
+                matching_users.remove(user)
+                if len(matching_users) == 0:
+                    send_message(chat_id, "❌ Нельзя отправить благодарность самому себе")
+                    show_keyboard(chat_id)
+                    return
 
-        user_cache = grouped_users  # Сохраняем кэш пользователей по буквам
-
-        # Создаем inline-клавиатуру с уникальными первыми буквами
-        keyboard = []
-        row = []
-        for letter in sorted(grouped_users.keys()):
-            row.append({"text": letter, "callback_data": f"letter_{letter}"})
-            # Если в строке 3 элемента, то добавляем строку в клавиатуру и начинаем новую строку
-            if len(row) == 3:
-                keyboard.append(row)
-                row = []
-
-        # Если есть остаток (меньше 3 букв), добавляем их как отдельную строку
-        if row:
-            keyboard.append(row)
-
-        reply_markup = {"inline_keyboard": keyboard}
-
-        send_message(chat_id, "Выбери первую букву фамилии:", reply_markup)
+        if not matching_users:
+            send_message(chat_id, "❌ Коллеги с такой фамилией не найдены. Попробуйте снова.")
+            show_keyboard(chat_id)
+            return
+        else:
+            # Если несколько вариантов, просим выбрать из списка
+            keyboard = [[{"text": name, "callback_data": f"user_{name.split('.')[0]}"}] for name in matching_users]
+            reply_markup = {"inline_keyboard": keyboard}
+            send_message(chat_id, "Выберите коллегу из списка:", reply_markup)
 
     except requests.RequestException as e:
-        logging.error(f"Ошибка при получении данных из store: {e}")
+        logging.error(f"Ошибка при получении данных: {e}")
         send_message(chat_id, "Произошла ошибка при получении данных. Попробуйте позже.")

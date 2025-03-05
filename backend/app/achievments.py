@@ -1,6 +1,7 @@
 from db import get_db_connection
 from flask import jsonify, request
 from datetime import datetime
+from notifier import send_achievement_notification
 
 def get_all_achievements():
     try:
@@ -193,6 +194,7 @@ def send_achievement():
         # check balance before actions
         cursor.execute("SELECT count FROM user_achievements_balance WHERE user_id = %s AND achievement_id = %s", (sender_id, achievement_id))
         balance = cursor.fetchone()
+        
         if not balance or balance[0] == 0:
             conn.close()
             return jsonify({"error": "Недостаточно наградных монет для отправки достижения", "status": "failed"}), 200
@@ -206,20 +208,20 @@ def send_achievement():
         conn.commit()
 
         # update user ncoins and npoints
-
+        print("Balance", balance)
         query = """
             SELECT need_verification FROM achievements WHERE id = %s
         """
         cursor.execute(query, (achievement_id,))
         need_verification = cursor.fetchone()[0]
-
+        print("need_verification", need_verification)
         if not need_verification:
             updateUserWeightQuery = """
                 UPDATE user_details
                 SET ncoins = ncoins + %s, npoints = npoints + %s
                 WHERE user_id = %s
             """
-
+            print("No verification needed")
             cursor.execute(updateUserWeightQuery, (achievement_weight, achievement_weight, user_id))
             conn.commit()
 
@@ -231,7 +233,7 @@ def send_achievement():
 
             cursor.execute(updateAchievmentQuery, (user_id, achievement_id, sender_id))
             conn.commit()
-
+        print("removeAchievmentQuery", balance)
         # make count less in user_achievements_balance
         removeAchievmentQuery = """
             UPDATE user_achievements_balance
@@ -244,6 +246,11 @@ def send_achievement():
         conn.commit()
         cursor.close()
         conn.close()
+        achievement_data = {
+            'reciever_id': user_id,
+            'achievement_id': achievement_id
+        }
+        send_achievement_notification(achievement_data)
         return jsonify({'message': 'Достижение успешно отправлено', 'result': 'success'}), 200
     except Exception as e:
         # Общая обработка других ошибок
@@ -287,6 +294,11 @@ def verify_achievement():
             cursor.execute(updateUserWeightQuery, (achievement_weight, achievement_weight, user_id))
             conn.commit()
             message = 'Достижение успешно подтверждено'
+            achievement_data = {
+                'reciever_id': user_id,
+                'achievement_id': achievement_id
+            }
+            send_achievement_notification(achievement_data)
         else:
             # remove achievement
             query = """
