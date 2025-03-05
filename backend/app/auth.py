@@ -61,7 +61,7 @@ def login():
     try:
         query = """
         SELECT id FROM users
-        WHERE login = %s AND password = %s and is_active = TRUE;
+        WHERE login = %s AND password = %s and is_active = true;
         """
         cursor.execute(query, (login_input, password_input))
         user = cursor.fetchone()
@@ -382,8 +382,7 @@ def user_id_to_token():
 
     """Преобразует user_id в токен."""
     token = base64.urlsafe_b64encode(str(login).encode()).decode()
-    print(token)
-    return token
+    return jsonify({"token": token})
 
 def token_to_user_id(token: str) -> int:
     """Преобразует токен обратно в user_id."""

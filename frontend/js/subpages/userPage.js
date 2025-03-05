@@ -4,6 +4,8 @@ import { initMyPageEventHandlers } from "../upload.js";
 const currentUser = localStorage.getItem('current_user_id');
 const backendUrl = localStorage.getItem('backendUrl');
 
+let user_tg_is_linked = false;
+
 export async function loadUserPageContent(userId, backendUrl, signal) {
     // console.log(`Загружаем страницу пользователя ${userId}: ${backendUrl}`);
     localStorage.setItem('user_id', userId);
@@ -46,9 +48,66 @@ export async function loadUserPageContent(userId, backendUrl, signal) {
             npoints: detailsData.npoints === 0 ? "0" : detailsData.npoints,
         };
 
+        if (data.tg_id == null) {
+            user_tg_is_linked = false;
+        } else {
+            user_tg_is_linked = true;
+        }
+
         // Создание карточки пользователя
         const userCard = createUserCard(data);
         userContent.appendChild(userCard);
+        if (localStorage.getItem('tg_token') == null) {
+            console.log({ user_id: userId });
+            // get user token from api, POST and save to localstorage
+            fetch(`${backendUrl}/users/tg/get_token`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ user_id: userId }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // Обработка успешного ответа
+                    console.log('Success:', data);
+                    localStorage.setItem('tg_token', data.token);
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                })
+        }
+
+        // Создание блока с кнопками
+        const buttonsBlock = document.createElement('div');
+        const buttonsDiv = document.createElement('div');
+        buttonsDiv.classList.add('d-flex', 'flex-row', 'justify-content-center');
+        const button1 = document.createElement('button');
+        button1.classList.add('btn', 'btn-gray', 'w-100');
+        button1.textContent = 'ПЕРЕЙТИ В TELEGRAM';
+        button1.target = '_blank';
+        // POST запрос
+        button1.addEventListener('click', () => {
+            // open new tab with url
+            if (user_tg_is_linked) {
+                window.open(`https://t.me/NIIASGAMEBot`, '_blank');
+            }
+            else {
+                window.open(`https://t.me/NIIASGAMEBot?start=linktg${localStorage.getItem('tg_token')}`, '_blank');
+            }
+        });
+
+        const button2 = document.createElement('a');
+        button2.classList.add('btn', 'btn-gray', 'w-100');
+        button2.textContent = 'ПЕРЕЙТИ В СONFLUENCE';
+        button2.addEventListener('click', () => {
+            // open new tab with url
+            window.open(`http://confluence.niias/pages/viewpage.action?pageId=98402311`, '_blank');
+        });
+        buttonsDiv.appendChild(button1);
+        buttonsDiv.appendChild(button2);
+        buttonsBlock.appendChild(buttonsDiv);
+        userContent.appendChild(buttonsBlock);
 
         // Применяем CSS Grid для контейнера с пользователями
         teamMembersGridDiv.style.display = 'grid';

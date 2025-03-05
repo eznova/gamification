@@ -61,6 +61,7 @@ def get_all_users():
         JOIN user_details ud ON u.id = ud.user_id
         JOIN user_job_titles ujt ON u.id = ujt.user_id
         JOIN departments d ON u.department_id = d.id
+        WHERE u.is_active = true
         """
         cursor.execute(query)
         users = cursor.fetchall()
@@ -92,7 +93,7 @@ def get_user_team_members(user_id):
         FROM users u
         JOIN user_job_titles ujt ON u.id = ujt.user_id
         JOIN departments d ON u.department_id = d.id
-        WHERE d.id = %s
+        WHERE d.id = %s and u.is_active = true
         """
         cursor.execute(query, (department_id,))
         team = cursor.fetchall()
