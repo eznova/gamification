@@ -10,6 +10,10 @@ CORS(app)
 swagger = Swagger(app)
 
 ################################## USER ENDPOINTS ##################################
+# Получение id пользователя
+@app.route('/users/get/id', methods=['POST'])
+def get_user_id(): return users.get_user_id()
+
 # Получение персональных данных пользователя
 @app.route('/users/get/<int:user_id>/personal', methods=['GET'])
 def get_user_personal(user_id): return users.get_user_personal(user_id)
@@ -84,6 +88,12 @@ def get_codes(): return auth.get_codes()
 
 @app.route('/users/codes/add', methods=['GET'])
 def add_codes(): return auth.add_codes()
+
+@app.route('/users/tg/get_token', methods=['POST'])
+def user_id_to_token(): return auth.user_id_to_token()
+
+@app.route('/users/tg/set_token', methods=['POST'])
+def link_tg(): return auth.link_tg()
 
 ################################## SYSTEM ENDPOINTS ##################################
 # Получение ID системы

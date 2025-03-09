@@ -1,6 +1,8 @@
 import { loadUserPageContent } from './userPage.js';
+import { reloadMenu } from '../navbar.js';
 
 const backendUrl = localStorage.getItem('backendUrl');
+
 
 // Функция для получения активных ачивок пользователя с учетом количества
 function getActiveAchievements(userId, backendUrl) {
@@ -479,11 +481,70 @@ export function sendAchievment(data, backendUrl) {
     .then(response => response.json())
     .then(data => {
         console.log('Success:', data);
+        showResultAchievmentContent(data);
     })
     .catch((error) => {
         console.error('Error:', error);
     });
 
+}
+
+export function showResultAchievmentContent(result) {
+    const resultContainer = document.getElementById('content');
+    resultContainer.innerHTML = ''; // Очищаем содержимое формы
+
+    const resultDiv = document.createElement('div');
+    resultDiv.classList.add('row');
+
+    // Вывести в строку три сердечка imgs/big_heart.svg
+    const hearts = document.createElement('div');
+    hearts.classList.add('col-12', 'd-flex', 'justify-content-center', 'align-items-center');
+    for (let i = 0; i < 3; i++) {
+        const heart = document.createElement('img');
+        heart.src = 'imgs/big_green_heart.svg';
+        heart.alt = 'Сердечко';
+        heart.classList.add('heart');
+        heart.style.width = '70px'; // Задаем размер сердечек
+        heart.style.margin = '0 5px';
+        hearts.appendChild(heart);
+    }
+    resultDiv.appendChild(hearts);
+
+    const resultText = document.createElement('div');
+    resultText.classList.add('col-12', 'text-center', 'mt-3');
+    resultText.textContent = 'Достижение отправленно на модерацию!';
+
+    const resultText2 = document.createElement('div');
+    resultText2.classList.add('col-12', 'text-center', 'mt-3');
+    resultText2.textContent = 'Мы свяжемся, если понадобится дополнительная информация';
+
+    resultDiv.appendChild(resultText);
+    resultDiv.appendChild(resultText2);
+
+    resultContainer.appendChild(resultDiv);
+
+    // Добавляем две кнопки посередине страницы
+    const buttonsDiv = document.createElement('div');
+    buttonsDiv.classList.add('d-flex', 'justify-content-center', 'align-items-center', 'mt-4');
+
+    const myPageButton = document.createElement('button');
+    myPageButton.textContent = 'К МОЕЙ СТРАНИЦЕ';
+    myPageButton.classList.add('btn', 'btn-gray', 'mx-2');
+    myPageButton.addEventListener('click', () => {
+        // Переходим на страницу "Моя страница"
+        reloadMenu('my-page');
+    });
+    buttonsDiv.appendChild(myPageButton);
+
+    const anotherButton = document.createElement('button');
+    anotherButton.textContent = 'К ДОСТИЖЕНИЯМ';
+    anotherButton.classList.add('btn', 'btn-gray', 'mx-2');
+    anotherButton.addEventListener('click', () => {
+        reloadMenu('my-achievements');
+    });
+    buttonsDiv.appendChild(anotherButton);
+
+    resultContainer.appendChild(buttonsDiv);
 }
 
 import { checkRoles } from '../rolesController.js';

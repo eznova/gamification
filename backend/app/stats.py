@@ -97,7 +97,7 @@ def get_top10_users():
         JOIN user_job_titles ujt ON u.id = ujt.user_id
         JOIN departments d ON u.department_id = d.id
         JOIN user_details ud ON u.id = ud.user_id
-        ORDER BY ncoins DESC
+        ORDER BY npoints DESC
         LIMIT 10;
         """
 

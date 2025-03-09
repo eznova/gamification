@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  bot:
+    container_name: bot
+    image: python:3.10
+    restart: always
+    volumes:
+      - ./app:/app
+    working_dir: /app
+    command: /bin/bash -c "pip3 install -r /app/requirements.txt && python3 bot.py"
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 100M
+  

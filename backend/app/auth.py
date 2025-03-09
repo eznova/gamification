@@ -4,6 +4,7 @@ import hashlib
 from datetime import datetime
 from config import DEFAULT_USER_ROLE_ID, DEFAULT_TEAM_ID
 import requests
+import base64
 
 
 def login():
@@ -60,7 +61,7 @@ def login():
     try:
         query = """
         SELECT id FROM users
-        WHERE login = %s AND password = %s and is_active = TRUE;
+        WHERE login = %s AND password = %s and is_active = true;
         """
         cursor.execute(query, (login_input, password_input))
         user = cursor.fetchone()
@@ -192,7 +193,7 @@ def register_user(data):
         "name": data["name"],
         "patronymic": data["patronymic"],
         "surname": data["surname"],
-        "birthdate": datetime.strptime(data["birthdate"], "%d.%m.%Y").date(),
+        "birthdate": datetime.strptime(data["birthdate"], "%Y-%m-%d").date(),
         "tg_nickname": data["telegram"],
         "phone": data["phone"],
         "department_id": int(data["department"]),
@@ -207,7 +208,7 @@ def register_user(data):
     user_job_info = {
         "job_title": data["jobTitle"],
         "role": data["jobRole"],
-        "onboarding_date": datetime.strptime(data["onboarding_date"], "%d.%m.%Y").date(),
+        "onboarding_date": datetime.strptime(data["onboarding_date"], "%Y-%m-%d").date(),
         "projects": data["projects"]
     }
 
@@ -370,3 +371,48 @@ def get_codes():
     conn.close()
     codes = [{"id": code[0], "code": code[1]} for code in codes]
     return jsonify(codes), 200
+
+def user_id_to_token():
+    data = request.get_json()
+    user_id = data.get('user_id')
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT login FROM users WHERE id = %s", (user_id,))
+    login = cursor.fetchone()[0]
+
+    """Преобразует user_id в токен."""
+    token = base64.urlsafe_b64encode(str(login).encode()).decode()
+    return jsonify({"token": token})
+
+def token_to_user_id(token: str) -> int:
+    """Преобразует токен обратно в user_id."""
+    login = base64.urlsafe_b64decode(token.encode()).decode()
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id FROM users WHERE login = %s", (login,))
+    user_id = cursor.fetchone()[0]
+    print(user_id)
+    return int(user_id)
+
+def link_tg():
+    data = request.get_json()
+    token = data.get('token')
+    tg_id = data.get('tg_id')
+    print(token, tg_id)
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    # token is sha256 of user_id, decrypt it
+    user_id = token_to_user_id(token)
+    # check if tg_id is already linked to user_id
+    cursor.execute("SELECT tg_id FROM users WHERE id = %s", (user_id,))
+    if cursor.fetchone()[0] is None:
+        print(user_id, tg_id)
+        cursor.execute("UPDATE users SET tg_id = %s WHERE id = %s", (tg_id, user_id))
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return jsonify({"message": "TG ID linked successfully", "status": "success"}), 200
+    else:
+        cursor.close()
+        conn.close()
+        return jsonify({"message": "TG ID already linked to user", "status": "failed"}), 400
