@@ -32,7 +32,7 @@ def handle_latest_news(chat_id):
                 last_3_news_message += f"_{content}_\n\n"  # Курсивное содержание
 
             # Добавляем кнопку "Подробнее"
-            last_3_news_message += f"[Посмотреть ленту новостей ➡️ ]({FRONTEND_BASE_URL})"
+            last_3_news_message += f"[Посмотреть ленту новостей ➡️ ]({FRONTEND_BASE_URL}/account?navItem=news)"
 
             send_message(chat_id, last_3_news_message, reply_markup=None)
         else:

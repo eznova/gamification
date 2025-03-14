@@ -20,7 +20,7 @@ def handle_meme_of_day(chat_id):
             image = requests.get(f'{BACKEND_BASE_URL}/mems/get/image/{best_meme}').content
 
             # Формируем сообщение с мемом месяца
-            send_image(chat_id, image, f"[Посмотреть больше мемов ➡️]({FRONTEND_BASE_URL})")
+            send_image(chat_id, image, f"[Посмотреть больше мемов ➡️]({FRONTEND_BASE_URL}/account?navItem=mems)")
         else:
             send_message(chat_id, "❌ Не удалось получить информацию о меме месяца.")
         show_keyboard(chat_id)

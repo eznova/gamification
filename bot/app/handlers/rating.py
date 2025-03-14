@@ -27,7 +27,7 @@ def handle_check_points(chat_id):
         rank = data.get("rank", 0)
 
         message_text = f"Ты набрал {npoints} Npoints\nТвоя позиция в рейтинге {rank}"
-        message_text += f"\n[Как зарабатывать баллы ➡️]({FRONTEND_BASE_URL})"
+        message_text += f"\n[Как зарабатывать баллы ➡️]({FRONTEND_BASE_URL}/account?navItem=rules)"
         send_message(chat_id, message_text)
     except requests.RequestException as e:
         # Логируем ошибку при запросе

@@ -117,7 +117,7 @@ def send_achievement_notification(achievement_data):
 
 
     message_text = f"Получено достижение, поздравляем!\n"
-    message_text += f'[Посмотреть карту достижений ➡️]({FRONT_BASE_URL})'
+    message_text += f'[Посмотреть карту достижений ➡️]({FRONT_BASE_URL}/account?navItem=my-achievements)'
     # Пример использования
     download_and_send_image(achievement_url, reciever_tg_id, message_text)
     # код для отправки уведомления пользователю
