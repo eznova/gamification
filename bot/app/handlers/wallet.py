@@ -37,7 +37,7 @@ def handle_check_wallet(chat_id):
             for item in store_items:
                 available_items += f"{item['name']} - {item['price']} Ncoins\n"
 
-            available_items += f"\n[Перейти в магазин ➡️]({FRONTEND_BASE_URL})"
+            available_items += f"\n[Перейти в магазин ➡️]({FRONTEND_BASE_URL}/account?navItem=store)"
             send_message(chat_id, available_items)
     except requests.RequestException as e:
         # Логируем ошибку при запросе

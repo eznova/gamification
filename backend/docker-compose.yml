@@ -11,9 +11,9 @@ services:
       - ./app:/app
     working_dir: /app
     command: /bin/bash -c "pip3 install -r /app/requirements.txt && python3 main.py"
-    deploy:
-      resources:
-        limits:
-          cpus: "2"
-          memory: 100M
+#    deploy:
+#      resources:
+#        limits:
+#          cpus: "2"
+#          memory: 100M
   
