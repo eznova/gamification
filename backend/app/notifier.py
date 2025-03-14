@@ -44,7 +44,9 @@ def send_telegram_image(chat_id, image_path, message):
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendPhoto"
     files = {"photo": open(image_path, "rb")}
     payload = {"chat_id": chat_id, "caption": message, "parse_mode": "Markdown"}
+    print(payload)
     requests.post(url, files=files, data=payload)
+    return
 
 def download_and_send_image(achievement_url, reciever_tg_id, message_text):
     # Скачиваем файл по URL
@@ -56,6 +58,8 @@ def download_and_send_image(achievement_url, reciever_tg_id, message_text):
         with tempfile.NamedTemporaryFile(delete=False, suffix='.svg') as temp_file:
             temp_file.write(response.content)
             temp_file_path = temp_file.name
+        
+        print(f"Изображение сохранено в {temp_file_path}. Отправляем его пользователю {reciever_tg_id} с текстом {message_text}")
 
         # Отправляем изображение
         send_telegram_image(reciever_tg_id, temp_file_path, message_text)
@@ -64,6 +68,7 @@ def download_and_send_image(achievement_url, reciever_tg_id, message_text):
         os.remove(temp_file_path)
     else:
         logging.debug(f"Ошибка скачивания изображения: {response.status_code}")
+    return
 
 def send_thx_notification(thx_data):
     logging.debug(f"Sending thx notification {thx_data}")
