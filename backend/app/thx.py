@@ -57,6 +57,7 @@ def add_thx():
             "created_at": created_at,
             "message": message
         }
+        
         send_thx_notification(thx_data)
         return jsonify(
             {
