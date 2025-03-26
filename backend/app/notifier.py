@@ -49,11 +49,12 @@ def send_telegram_image(chat_id, image_path, message):
     return
 
 def download_and_send_image(achievement_url, reciever_tg_id, message_text):
+    print(f"Downloading image from {achievement_url}")
     # Скачиваем файл по URL
     response = requests.get(achievement_url)
     
     if response.status_code == 200:
-        logging.debug("Файл успешно скачан!")
+        print("Файл успешно скачан!")
         # Создаем временный файл для хранения изображения
         with tempfile.NamedTemporaryFile(delete=False, suffix='.svg') as temp_file:
             temp_file.write(response.content)
@@ -67,8 +68,8 @@ def download_and_send_image(achievement_url, reciever_tg_id, message_text):
         # Удаляем временный файл после отправки
         os.remove(temp_file_path)
     else:
-        logging.debug(f"Ошибка скачивания изображения: {response.status_code}")
-    return
+        print(f"Ошибка скачивания изображения: {response.status_code}")
+    return True
 
 def send_thx_notification(thx_data):
     logging.debug(f"Sending thx notification {thx_data}")
@@ -112,13 +113,17 @@ def send_achievement_notification(achievement_data):
 
     cursor.execute("SELECT img_name FROM achievements WHERE id = %s", (achievement_id,))
     achievement_image = cursor.fetchone()[0].replace(".svg", ".webp")
-    achievement_url = f'{FRONT_BASE_URL}/imgs/achievements/webp/{achievement_image}'
+    cursor.close()
     conn.close()
+    print(achievement_image)
+    achievement_url = f'{FRONT_BASE_URL}/imgs/achievements/webp/{achievement_image}'
+    print(achievement_url)
 
 
     message_text = f"Получено достижение, поздравляем!\n"
     message_text += f'[Посмотреть карту достижений ➡️]({FRONT_BASE_URL}/account?navItem=my-achievements)'
+    print(message_text)
     # Пример использования
     download_and_send_image(achievement_url, reciever_tg_id, message_text)
     # код для отправки уведомления пользователю
-    return
+    return True

@@ -331,8 +331,11 @@ def get_unverified_achievements():
         cursor = conn.cursor()
 
         query = """
-            SELECT achievement_id, user_id, sender_id, verified, achievement_weight
-            FROM user_achievements
+            SELECT a.id , user_id, sender_id, verified, ua.achievement_weight, concat_ws(' ', ru.surname, ru.name, ru.patronymic), concat_ws(' ', su.surname, su.name, su.patronymic), a.name
+            FROM user_achievements ua
+            JOIN achievements a ON ua.achievement_id = a.id
+            JOIN users su ON ua.sender_id = su.id
+            JOIN users ru ON ua.user_id = ru.id
             WHERE verified = FALSE
         """
 
@@ -346,7 +349,10 @@ def get_unverified_achievements():
                     'user_id': achievement[1],
                     'sender_id': achievement[2],
                     'verified': achievement[3],
-                    'achievement_weight': achievement[4]
+                    'achievement_weight': achievement[4], 
+                    'reciever_name': achievement[5],
+                    'sender_name': achievement[6],
+                    'achievement_name': achievement[7]
                 }
             )
 

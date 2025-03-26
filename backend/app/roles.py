@@ -43,23 +43,36 @@ def get_user_wallet(user_id):
     cursor = conn.cursor()
     query = """
         SELECT 
-            uab.id, uab.user_id, a.id, uab.count,
-            ra.max_count, 
-            a.name,
-            u.name, u.patronymic, u.surname, u.tg_nickname,
-            d.department_name,
-            ujt.job_title,
-            r.role_name,
-            a.achievement_weight, a.department_only
-        FROM users u
-        inner JOIN user_job_titles ujt ON ujt.user_id = u.id
-        inner JOIN departments d ON d.id = u.department_id
-        inner join user_roles ur on u.id = ur.user_id 
-        inner JOIN roles r ON r.id = ur.role_id 
-        left JOIN user_achievements_balance uab ON uab.user_id = u.id 
-        left JOIN achievements a ON uab.achievement_id = a.id
-        left JOIN role_achievements ra ON ra.achievement_id = uab.achievement_id
-        WHERE u.id = %s
+    uab.id, 
+    uab.user_id, 
+    a.id AS achievement_id, 
+    uab.count,
+    ra.max_count, 
+    a.name AS achievement_name,
+    u.name, 
+    u.patronymic, 
+    u.surname, 
+    u.tg_nickname,
+    d.department_name,
+    ujt.job_title,
+    STRING_AGG(r.role_name, ', ') AS roles,  -- Собираем все роли в одну строку
+    a.achievement_weight, 
+    a.department_only
+FROM users u
+JOIN user_job_titles ujt ON ujt.user_id = u.id
+JOIN departments d ON d.id = u.department_id
+JOIN user_roles ur ON u.id = ur.user_id 
+JOIN roles r ON r.id = ur.role_id 
+LEFT JOIN user_achievements_balance uab ON uab.user_id = u.id 
+LEFT JOIN achievements a ON uab.achievement_id = a.id
+LEFT JOIN role_achievements ra ON ra.achievement_id = COALESCE(uab.achievement_id, a.id)
+WHERE u.id = %s 
+AND ra.department_id = u.department_id
+GROUP BY 
+    uab.id, uab.user_id, a.id, uab.count, ra.max_count, 
+    a.name, u.name, u.patronymic, u.surname, u.tg_nickname,
+    d.department_name, ujt.job_title, 
+    a.achievement_weight, a.department_only;
     """
     cursor.execute(query, (user_id,))
     roles = cursor.fetchall()

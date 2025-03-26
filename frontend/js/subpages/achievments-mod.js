@@ -40,7 +40,7 @@ function createAchievementCard(achievement) {
     const header = document.createElement('div');
     header.classList.add('user-card-text');
     header.style.paddingBottom = '0.5em';
-    header.textContent = `Ачивка ID: ${achievement.achievement_id}`;
+    header.textContent = `Ачивка ID: ${achievement.achievement_id} | ${achievement.achievement_name}`;
     achievementDiv.appendChild(header);
 
     const weight = document.createElement('div');
@@ -50,7 +50,7 @@ function createAchievementCard(achievement) {
 
     const sender = document.createElement('div');
     sender.classList.add('card-text');
-    sender.textContent = `Отправитель ID: ${achievement.sender_id}`;
+    sender.textContent = `Отправитель ID: ${achievement.sender_id} | ${achievement.sender_name} -> ${achievement.reciever_name}`;
     achievementDiv.appendChild(sender);
 
     const buttonContainer = document.createElement('div');
