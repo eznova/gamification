@@ -241,7 +241,7 @@ def add_user_role():
         print(data)
         conn = get_db_connection()
         cursor = conn.cursor()
-        if role_id == 11:
+        if role_id != 11:
             query = """
             INSERT INTO user_roles (role_id, user_id) VALUES (%s, %s);
             """
