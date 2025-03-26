@@ -246,11 +246,12 @@ def send_achievement():
         conn.commit()
         cursor.close()
         conn.close()
-        achievement_data = {
-            'reciever_id': user_id,
-            'achievement_id': achievement_id
-        }
-        send_achievement_notification(achievement_data)
+        if not need_verification:
+            achievement_data = {
+                'reciever_id': user_id,
+                'achievement_id': achievement_id
+            }
+            send_achievement_notification(achievement_data)
         return jsonify({'message': 'Достижение успешно отправлено', 'result': 'success'}), 200
     except Exception as e:
         # Общая обработка других ошибок

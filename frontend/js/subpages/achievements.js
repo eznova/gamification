@@ -399,6 +399,7 @@ export async function createRewardPage(data, backendUrl) {
         theadRow.appendChild(th3);
         thead.appendChild(theadRow);
         const submitButton = document.createElement('button');
+        let achievmentsCount = 0;
         for (const roleItem in data.role) {
             for (const achievment of data.role[roleItem].wallet) {
                 const achievmentRow = document.createElement('tr');
@@ -418,11 +419,15 @@ export async function createRewardPage(data, backendUrl) {
                     option.setAttribute('value', achievment.achievement_id);
                     option.textContent = achievment.achievement_name;
                     select.appendChild(option);
+                    achievmentsCount++;
                 }
                 else {
-                    submitButton.disabled = true;
+                    submitButton.disabled = false;
                 }
-            } 
+            }
+        if (achievmentsCount == 0) {
+            submitButton.disabled = true;
+        }
         }
 
         // Контейнер для кнопок

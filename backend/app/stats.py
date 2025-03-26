@@ -9,7 +9,7 @@ def get_user_rank(user_id):
         # Query to calculate rank for all users and filter by the specified user_id
         query = """
         WITH ranked_users AS (
-            SELECT 
+            SELECT DISTINCT ON (u.id)
                 u.id, 
                 name, 
                 surname, 
@@ -17,17 +17,21 @@ def get_user_rank(user_id):
                 department_name,
                 job_title,
                 ncoins, 
-                npoints,  
-                RANK() OVER (ORDER BY npoints DESC) AS rank
+                npoints
             FROM users u
             JOIN user_details ud ON u.id = ud.user_id
             JOIN user_roles ur ON u.id = ur.user_id
             JOIN user_job_titles ujt ON u.id = ujt.user_id
             JOIN departments d ON u.department_id = d.id
+            WHERE u.is_active = true
         )
-        SELECT * 
-        FROM ranked_users 
-        WHERE id = %s
+        SELECT *
+        FROM (
+            SELECT *,
+                  RANK() OVER (ORDER BY npoints DESC) AS rank
+            FROM ranked_users
+        ) ranked
+        WHERE id = %s;
         """
         
         # Execute the query with the given user_id
@@ -83,7 +87,7 @@ def get_top10_users():
         conn = get_db_connection()
         cursor = conn.cursor()
         query = """
-        SELECT 
+        SELECT
             u.id, 
             name, 
             surname,
@@ -97,6 +101,7 @@ def get_top10_users():
         JOIN user_job_titles ujt ON u.id = ujt.user_id
         JOIN departments d ON u.department_id = d.id
         JOIN user_details ud ON u.id = ud.user_id
+        WHERE u.is_active = true
         ORDER BY npoints DESC
         LIMIT 10;
         """

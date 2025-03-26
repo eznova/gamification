@@ -241,78 +241,87 @@ def add_user_role():
         print(data)
         conn = get_db_connection()
         cursor = conn.cursor()
-        query = """
-          INSERT INTO user_roles (role_id, user_id) VALUES (%s, %s);
-        """
-        # uncomment to add role
-        cursor.execute(query, (role_id, user_id))
-        conn.commit()
-
-        # check if user is admin
-        query = """
-            SELECT 
-                CASE 
-                    WHEN COUNT(*) > 0 THEN TRUE 
-                    ELSE FALSE 
-                END AS result
-            FROM user_roles ur
-            JOIN users u ON u.id = ur.user_id
-            WHERE ur.user_id = %s AND u.department_id = 1;
-        """
-        print(query)
-        cursor.execute(query, (user_id,))
-        admin_roles = cursor.fetchone()[0]
-        print(f'admin_roles: {admin_roles}')
-        cursor.execute("SELECT department_id FROM users WHERE id = %s", (user_id,))
-        department_id = cursor.fetchone()[0]
-        print(f'User {user_id} department id: {department_id}')
-
-        if admin_roles == True:
-            print(f"User {user_id} is in administration department")
-            # get user department id
-            # get role achievements max count
-            cursor.execute("SELECT achievement_id, max_count FROM role_achievements WHERE role_id = %s and department_id = %s", (role_id, department_id))
-            max_balance = cursor.fetchall()
-            for balance in max_balance:
-                cursor.execute("INSERT INTO user_achievements_balance (user_id, achievement_id, count) VALUES (%s, %s, %s)", (user_id, balance[0], balance[1]))
-                conn.commit()
-            if int(role_id) == 4:
-                cursor.execute("DELETE FROM users WHERE id = 1")
-                conn.commit()
-
-        else:
-            print(f"User {user_id} is not in administration department")
+        if role_id == 11:
             query = """
-                select  id from achievements a where department_only = true;
+            INSERT INTO user_roles (role_id, user_id) VALUES (%s, %s);
             """
-            cursor.execute(query)
-            achievements = cursor.fetchall()
-            # get users count in department
-            cursor.execute("SELECT COUNT(*) FROM users WHERE department_id = %s", (department_id,))
-            users_count = cursor.fetchone()[0]
-            print(f'In department {department_id} users count: {users_count}')
-            # get role achievements max count
-            max_count = round(users_count / 5) if users_count > 5 else 1
-            print(f'In department {department_id} max count: {max_count} for role {role_id}')
-            for achievement in achievements:
-                # print(achievement)
-                # get max id
-                cursor.execute("SELECT MAX(id) FROM user_achievements_balance")
-                max_id = cursor.fetchone()[0]
-                if max_id is None:
-                    max_id = 0
-                max_id += 1
-                cursor.execute("INSERT INTO user_achievements_balance (id, user_id, achievement_id, count) VALUES (%s, %s, %s, %s)", (max_id, user_id, achievement[0], max_count))
-                conn.commit()
-                # add max count to role_achievements
+            # uncomment to add role
+            cursor.execute(query, (role_id, user_id))
+            conn.commit()
+
+            # check if user is admin
+            query = """
+                SELECT 
+                    CASE 
+                        WHEN COUNT(*) > 0 THEN TRUE 
+                        ELSE FALSE 
+                    END AS result
+                FROM user_roles ur
+                JOIN users u ON u.id = ur.user_id
+                WHERE ur.user_id = %s AND u.department_id = 1;
+            """
+            print(query)
+            cursor.execute(query, (user_id,))
+            admin_roles = cursor.fetchone()[0]
+            print(f'admin_roles: {admin_roles}')
+            cursor.execute("SELECT department_id FROM users WHERE id = %s", (user_id,))
+            department_id = cursor.fetchone()[0]
+            print(f'User {user_id} department id: {department_id}')
+
+            if admin_roles == True:
+                print(f"User {user_id} is in administration department")
+                # get user department id
                 # get role achievements max count
-                cursor.execute("SELECT MAX(id) FROM role_achievements")
-                max_id = cursor.fetchone()[0]
-                if max_id is None:
-                    max_id = 0
-                max_id += 1
-                cursor.execute("INSERT INTO role_achievements (id, role_id, achievement_id, department_id, max_count) VALUES (%s, %s, %s, %s, %s)", (max_id, role_id, achievement[0], department_id, max_count))
-                conn.commit()
+                cursor.execute("SELECT achievement_id, max_count FROM role_achievements WHERE role_id = %s and department_id = %s", (role_id, department_id))
+                max_balance = cursor.fetchall()
+                for balance in max_balance:
+                    cursor.execute("INSERT INTO user_achievements_balance (user_id, achievement_id, count) VALUES (%s, %s, %s)", (user_id, balance[0], balance[1]))
+                    conn.commit()
+                if int(role_id) == 4:
+                    cursor.execute("DELETE FROM users WHERE id = 1")
+                    conn.commit()
+
+            else:
+                print(f"User {user_id} is not in administration department")
+                query = """
+                    select  id from achievements a where department_only = true;
+                """
+                cursor.execute(query)
+                achievements = cursor.fetchall()
+                # get users count in department
+                cursor.execute("SELECT COUNT(*) FROM users WHERE department_id = %s", (department_id,))
+                users_count = cursor.fetchone()[0]
+                print(f'In department {department_id} users count: {users_count}')
+                # get role achievements max count
+                max_count = round(users_count / 5) if users_count > 5 else 1
+                print(f'In department {department_id} max count: {max_count} for role {role_id}')
+                for achievement in achievements:
+                    # print(achievement)
+                    # get max id
+                    cursor.execute("SELECT MAX(id) FROM user_achievements_balance")
+                    max_id = cursor.fetchone()[0]
+                    if max_id is None:
+                        max_id = 0
+                    max_id += 1
+                    cursor.execute("INSERT INTO user_achievements_balance (id, user_id, achievement_id, count) VALUES (%s, %s, %s, %s)", (max_id, user_id, achievement[0], max_count))
+                    conn.commit()
+                    # add max count to role_achievements
+                    # get role achievements max count
+                    cursor.execute("SELECT MAX(id) FROM role_achievements")
+                    max_id = cursor.fetchone()[0]
+                    if max_id is None:
+                        max_id = 0
+                    max_id += 1
+                    cursor.execute("INSERT INTO role_achievements (id, role_id, achievement_id, department_id, max_count) VALUES (%s, %s, %s, %s, %s)", (max_id, role_id, achievement[0], department_id, max_count))
+                    conn.commit()
+                cursor.close()
+                conn.close()
+        else:
+            query = """
+                UPDATE users SET is_active = false WHERE id = %s;
+            """
+            cursor.execute(query, (user_id,))
+            conn.commit()
             cursor.close()
             conn.close()
         return jsonify({"message": "User role added successfully", "status": "success"}), 200
