@@ -51,14 +51,15 @@ def get_user_wallet(user_id):
             ujt.job_title,
             r.role_name,
             a.achievement_weight, a.department_only
-        FROM user_achievements_balance uab
-        JOIN achievements a ON uab.achievement_id = a.id
-        JOIN role_achievements ra ON ra.achievement_id = uab.achievement_id
-        JOIN roles r ON r.id = ra.role_id 
-        JOIN users u ON u.id = uab.user_id
-        JOIN departments d ON d.id = u.department_id
-        JOIN user_job_titles ujt ON ujt.user_id = u.id
-        WHERE uab.user_id = %s
+        FROM users u
+        inner JOIN user_job_titles ujt ON ujt.user_id = u.id
+        inner JOIN departments d ON d.id = u.department_id
+        inner join user_roles ur on u.id = ur.user_id 
+        inner JOIN roles r ON r.id = ur.role_id 
+        left JOIN user_achievements_balance uab ON uab.user_id = u.id 
+        left JOIN achievements a ON uab.achievement_id = a.id
+        left JOIN role_achievements ra ON ra.achievement_id = uab.achievement_id
+        WHERE u.id = %s
     """
     cursor.execute(query, (user_id,))
     roles = cursor.fetchall()
