@@ -77,37 +77,39 @@ export async function loadUserPageContent(userId, backendUrl, signal) {
                     console.error('Error:', error);
                 })
         }
+        if (currentUser == userId) {
+            // Создание блока с кнопками
+            const buttonsBlock = document.createElement('div');
+            buttonsBlock.id = 'buttons-block';
+            const buttonsDiv = document.createElement('div');
+            buttonsDiv.classList.add('d-flex', 'flex-row', 'justify-content-center');
+            const button1 = document.createElement('button');
+            button1.classList.add('btn', 'btn-gray', 'w-100');
+            button1.textContent = 'ПЕРЕЙТИ В TELEGRAM';
+            button1.target = '_blank';
+            // POST запрос
+            button1.addEventListener('click', () => {
+                // open new tab with url
+                if (user_tg_is_linked) {
+                    window.open(`https://t.me/NIIASGAMEBot`, '_blank');
+                }
+                else {
+                    window.open(`https://t.me/NIIASGAMEBot?start=linktg${localStorage.getItem('tg_token')}`, '_blank');
+                }
+            });
 
-        // Создание блока с кнопками
-        const buttonsBlock = document.createElement('div');
-        const buttonsDiv = document.createElement('div');
-        buttonsDiv.classList.add('d-flex', 'flex-row', 'justify-content-center');
-        const button1 = document.createElement('button');
-        button1.classList.add('btn', 'btn-gray', 'w-100');
-        button1.textContent = 'ПЕРЕЙТИ В TELEGRAM';
-        button1.target = '_blank';
-        // POST запрос
-        button1.addEventListener('click', () => {
-            // open new tab with url
-            if (user_tg_is_linked) {
-                window.open(`https://t.me/NIIASGAMEBot`, '_blank');
-            }
-            else {
-                window.open(`https://t.me/NIIASGAMEBot?start=linktg${localStorage.getItem('tg_token')}`, '_blank');
-            }
-        });
-
-        const button2 = document.createElement('a');
-        button2.classList.add('btn', 'btn-gray', 'w-100');
-        button2.textContent = 'ПЕРЕЙТИ В СONFLUENCE';
-        button2.addEventListener('click', () => {
-            // open new tab with url
-            window.open(`http://confluence.niias/pages/viewpage.action?pageId=98402311`, '_blank');
-        });
-        buttonsDiv.appendChild(button1);
-        buttonsDiv.appendChild(button2);
-        buttonsBlock.appendChild(buttonsDiv);
-        userContent.appendChild(buttonsBlock);
+            const button2 = document.createElement('a');
+            button2.classList.add('btn', 'btn-gray', 'w-100');
+            button2.textContent = 'ПЕРЕЙТИ В СONFLUENCE';
+            button2.addEventListener('click', () => {
+                // open new tab with url
+                window.open(`http://confluence.niias/pages/viewpage.action?pageId=98402311`, '_blank');
+            });
+            buttonsDiv.appendChild(button1);
+            buttonsDiv.appendChild(button2);
+            buttonsBlock.appendChild(buttonsDiv);
+            userContent.appendChild(buttonsBlock);
+        }
 
         // Применяем CSS Grid для контейнера с пользователями
         teamMembersGridDiv.style.display = 'grid';
@@ -276,6 +278,8 @@ function createUserCard(user) {
     button.id = 'say-thanx';
     if (currentUser != user.id) {
         button.hidden = false;
+        const buttonsBlock = document.getElementById('buttons-block');
+        // buttonsBlock.style.display = 'none';
         button.textContent = 'Поблагодарить коллегу ';
         // Добавить внутрь кнопки hands.svg
         const img = document.createElement('img');

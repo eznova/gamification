@@ -61,6 +61,13 @@ const menuItems = [
     'data-icon-default': 'imgs/icons/empty.svg',
     alt: 'Иконка Покупки'
   },
+  {
+    id: 'db',
+    'data-title': 'База данных',
+    'data-icon-selected': 'imgs/icons/empty.svg',
+    'data-icon-default': 'imgs/icons/empty.svg',
+    alt: 'Иконка База данных'
+  }
 ];
 
 // Генерируем меню
