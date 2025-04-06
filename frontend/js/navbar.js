@@ -148,6 +148,24 @@ export function selectNavItem(selectedItem) {
     case 'purchases':
         loadFunction = () => renderPurchasesPage(userId, backendUrl, abortController.signal);
         break;
+    case 'db':
+      content.innerHTML = '';
+      // show text
+      content.textContent = 'В новой вкладке сейчас откроется pgAdmin4';
+
+      fetch(`${backendUrl}/db/host`, { signal: abortController.signal })
+        .then(response => response.json())
+        .then(dbUrl => {
+          window.open(`http://${dbUrl.host}:5050`, '_blank', 'noreferrer');
+        })
+        .catch(error => {
+          if (error.name !== 'AbortError') {
+            console.error('Ошибка загрузки:', error);
+          }
+        });
+
+      break;
+    
     default:
         content.innerHTML = '';
         content.textContent = `Раздел "${selectedItem.dataset.title}" еще в разработке`;

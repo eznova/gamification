@@ -2,7 +2,7 @@ from flask import Flask, jsonify
 from config import SYSTEM_COMPANY_ID 
 from flasgger import Swagger
 from flask_cors import CORS
-import users, stats, auth, photo, news, thx, achievments, tasks, store, mems, rules, roles
+import users, stats, auth, photo, news, thx, achievments, tasks, store, mems, rules, roles, db
 
 # Инициализация Flask-приложения
 app = Flask(__name__)
@@ -211,6 +211,10 @@ def get_max_balance(): return roles.get_max_balance()
 
 @app.route('/roles/get/<int:user_id>/wallet', methods=['GET'])
 def get_user_wallet(user_id): return roles.get_user_wallet(user_id)
+
+################################## DB ENDPOINTS ##################################
+@app.route('/db/host', methods=['GET'])
+def get_db_host(): return db.get_db_host()
 
 # Запуск сервера
 if __name__ == '__main__':
