@@ -1,0 +1,19 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/refs/heads/master/C4_Context.puml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/refs/heads/master/C4_Container.puml
+
+' Пользователь
+Person(user, "User", "Пользователь, взаимодействующий с системой")
+
+' Главная система
+System(niias_game, "NIIAS Game")
+
+' Внешняя система
+System_Ext(telegram_api, "Telegram API", "Внешняя платформа для обмена сообщениями")
+
+' Взаимодействия
+Rel(user, niias_game, "Использует веб-интерфейс, Общается через Telegram")
+
+Rel(niias_game, telegram_api, "Отправка и получение сообщений", "HTTPS API")
+
+@enduml

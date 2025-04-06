@@ -1,0 +1,32 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/refs/heads/master/C4_Context.puml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/refs/heads/master/C4_Container.puml
+
+' Пользователь
+Person(user, "User", "Пользователь, взаимодействующий с системой")
+
+' Главная система
+System_Boundary(niias_game, "NIIAS Game") {
+
+    Container(backend, "Backend", "Flask", "Обрабатывает бизнес-логику")
+    Container(frontend, "Frontend", "HTML", "Интерфейс для пользователей")
+    Container(db, "DB", "PostgreSQL", "Хранение данных")
+    Container(bot, "Bot", "Python", "Компонент, обрабатывающий Telegram-сообщения")
+}
+
+' Внешняя система
+System_Ext(telegram_api, "Telegram API", "Внешняя платформа для обмена сообщениями")
+
+' Взаимодействия
+Rel(user, frontend, "Использует веб-интерфейс")
+Rel(user, bot, "Общается через Telegram")
+
+Rel(frontend, backend, "Запросы и получение данных", "HTTPS")
+Rel(backend, db, "Чтение/запись данных", "SQL")
+Rel(backend, telegram_api, "Отправка и получение сообщений", "HTTPS API")
+Rel(bot, telegram_api, "Обмен сообщениями", "HTTPS API")
+Rel(bot, backend, "Взаимодействие с бизнес-логикой", "HTTPS")
+
+skinparam linetype polyline
+skinparam linetype ortho
+@enduml

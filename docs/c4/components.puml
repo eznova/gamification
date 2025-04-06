@@ -1,0 +1,85 @@
+@startuml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/refs/heads/master/C4_Context.puml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/refs/heads/master/C4_Container.puml
+!includeurl https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/refs/heads/master/C4_Component.puml
+
+' Пользователь
+Person(user, "User", "Пользователь, взаимодействующий с системой")
+
+' Главная система
+System_Boundary(niias_game, "NIIAS Game") {
+
+    Container(frontend, "Frontend", "HTML", "Интерфейс для пользователей")
+    Container(db, "DB", "PostgreSQL", "Хранение данных")
+    Container(bot, "Bot", "Python", "Компонент, обрабатывающий Telegram-сообщения")
+
+    ' Backend с компонентами
+    Container_Boundary(backend_boundary, "Backend (Flask)") {
+        Component(api_controller, "api_controller", "Обрабатывает API-запросы от фронтенда")
+        Component(auth, "auth", "Модуль аутентификации")
+        Component(db_module, "db", "Доступ к базе данных")
+        Component(news, "news", "Работа с новостями")
+        Component(mems, "mems", "Работа с мемами")
+        Component(notifier, "notifier", "Уведомления")
+        Component(photo, "photo", "Обработка изображений")
+        Component(roles, "roles", "Роли пользователей")
+        Component(rules, "rules", "Игровые правила")
+        Component(stats, "stats", "Статистика")
+        Component(store, "store", "Магазин")
+        Component(tasks, "tasks", "Задания")
+        Component(thx, "thx", "Благодарности")
+        Component(users, "users", "Управление пользователями")
+    }
+}
+
+' Внешняя система
+System_Ext(telegram_api, "Telegram API", "Внешняя платформа для обмена сообщениями")
+
+' Взаимодействия пользователя
+Rel(user, frontend, "Использует веб-интерфейс")
+Rel(user, bot, "Общается через Telegram")
+
+' Взаимодействия между контейнерами и компонентами
+Rel(frontend, api_controller, "API-запросы", "HTTPS")
+
+Rel(api_controller, auth, "Вызов логики авторизации")
+Rel(api_controller, news, "Получение/публикация новостей")
+Rel(api_controller, mems, "Работа с мемами")
+Rel(api_controller, photo, "Обработка изображений")
+Rel(api_controller, roles, "Управление ролями")
+Rel(api_controller, rules, "Доступ к игровым правилам")
+Rel(api_controller, stats, "Запрос статистики")
+Rel(api_controller, store, "Взаимодействие с магазином")
+Rel(api_controller, tasks, "Управление заданиями")
+Rel(api_controller, thx, "Обработка благодарностей")
+Rel(api_controller, users, "Работа с пользователями")
+
+Rel(auth, db_module, "Доступ к данным")
+Rel(news, db_module, "Доступ к данным")
+Rel(mems, db_module, "Доступ к данным")
+Rel(notifier, db_module, "Доступ к данным")
+Rel(photo, db_module, "Доступ к данным")
+Rel(roles, db_module, "Доступ к данным")
+Rel(rules, db_module, "Доступ к данным")
+Rel(stats, db_module, "Доступ к данным")
+Rel(store, db_module, "Доступ к данным")
+Rel(tasks, db_module, "Доступ к данным")
+Rel(thx, db_module, "Доступ к данным")
+Rel(users, db_module, "Доступ к данным")
+
+' Добавленные связи с notifier
+Rel(news, notifier, "Отправка уведомлений")
+Rel(thx, notifier, "Отправка уведомлений")
+
+Rel(db_module, db, "Чтение/запись данных", "SQL")
+Rel(notifier, telegram_api, "Отправка и получение сообщений", "HTTPS API")
+Rel(bot, telegram_api, "Обмен сообщениями", "HTTPS API")
+Rel(bot, api_controller, "Взаимодействие с логикой через API", "HTTPS")
+
+' Оптимизация размещения элементов
+' Это улучшит визуализацию схемы с упорядоченными линиями
+skinparam layout smartrank
+skinparam rankdir LR
+skinparam linetype polyline
+skinparam linetype ortho
+@enduml
