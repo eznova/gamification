@@ -3,7 +3,7 @@ const backendUrl = localStorage.getItem('backendUrl');
 import { reloadMenu } from '../navbar.js';
 import { loadUserPageContent } from './userPage.js';
 
-const currentUserId = localStorage.getItem('user_id');
+const currentUserId = localStorage.getItem('current_user_id');
 
 export async function loadSayThanxContent(userId, backendUrl, signal) {
     const content = document.getElementById('content');
